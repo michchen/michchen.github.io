@@ -5,8 +5,6 @@ import List from './components/List.jsx';
 
 
 
-// alert('hi');
-
 $(function () {
   var socket = io();
   $('form').submit(function(){
@@ -15,9 +13,6 @@ $(function () {
     return false;
   });
 });
-
-
-
 
 
 

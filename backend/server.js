@@ -1,21 +1,21 @@
 const bodyParser = require('body-parser')
-    , express = require('express');
-
+const express = require('express');
 const app = express();
-require('dotenv').config();
-
-var http = require('http').Server(app);
-// var io = require('socket.io')(http);
-
-var io = require('socket.io').listen(http);
-
-// const items = require('../database-mongo');
-
+const http = require('http').Server(app);
+const io = require('socket.io').listen(http);
+const ctrl = require('./controllers');
+const dotenv = require('dotenv').config();
 const PORT = process.env.PORT;
 
 app.use(express.static(__dirname + '/../react-client/dist'));
 
-// console.log(io);
+app.post('/add', (req, res) => {
+  ctrl.insertWord(req.query, (data) => {
+    // res.header(200);
+    res.send(data);
+  });
+})
+
 io.on('connection', function(socket){
   console.log('a user connected');
 
