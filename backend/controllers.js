@@ -18,15 +18,10 @@ module.exports.insertWord = (data, callback) => {
       callback(res.result);
     }
   );
-}
+};
 
-module.exports.newGame = (data, callback) => {
-  console.log('new game');
-  let entry = new Game({
-    _id: data.id,
-    words: []
+module.exports.getWords = (data, callback) => {
+  db.collections.games.find({_id: Number(data.id)}).toArray((err, data) => {
+    callback(data[0]);
   });
-  entry.save(err => {
-    callback(data)
-  });
-}
+};

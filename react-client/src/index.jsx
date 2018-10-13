@@ -5,6 +5,10 @@ import List from './components/List.jsx';
 
 
 
+//////////////////////////
+//  SOCKET.IO SETTINGS  //
+//////////////////////////
+
 $(function () {
   var socket = io();
   $('form').submit(function(){
@@ -15,6 +19,10 @@ $(function () {
 });
 
 
+
+//////////////////////////
+//   REACT COMPONENTS   //
+//////////////////////////
 
 class App extends React.Component {
   constructor(props) {
@@ -27,7 +35,7 @@ class App extends React.Component {
   componentDidMount() {
     // $.ajax({
     //   url: '/items',
-    //   success: (data) => {
+    //   success: (data) => {=
     //     this.setState({
     //       items: data
     //     })
@@ -38,7 +46,7 @@ class App extends React.Component {
     // });
   }
 
-  render () {
+  render() {
     return (<div>
       app
     </div>)
