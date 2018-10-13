@@ -9,12 +9,18 @@ const PORT = process.env.PORT;
 
 app.use(express.static(__dirname + '/../react-client/dist'));
 
-app.post('/add', (req, res) => {
+app.post('/play', (req, res) => {
   ctrl.insertWord(req.query, (data) => {
-    // res.header(200);
     res.send(data);
   });
-})
+});
+
+app.post('/game', (req, res) => {
+  ctrl.insertWord(req.query, (data) => {
+  // ctrl.newGame(req.query, data => {
+    res.send(data);
+  });
+});
 
 io.on('connection', function(socket){
   console.log('a user connected');
