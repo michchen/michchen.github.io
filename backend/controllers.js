@@ -2,13 +2,13 @@ const Game = require('./models/Game.js');
 const db = require('./database');
 
 module.exports.insertWord = (data, callback) => {
-  console.log('controllers > Word > insertWord');
-  console.log(data);
+  // console.log('controllers > Word > insertWord');
+  // console.log(data);
 
   db.collections.games.update(
     { _id: Number(data.id) },
     { $push: {
-      words: {
+      moves: {
         user: data.user,
         text: data.text,
       }

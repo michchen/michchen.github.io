@@ -1,9 +1,7 @@
 import React from 'react';
 import Word from './Word.jsx';
 
-const WordList = (props) => {
-  console.log(props.list);
-  return (
+const WordList = (props) => (
   <div>
     <h2>Build a sentence together!</h2>
     <ul>
@@ -12,6 +10,6 @@ const WordList = (props) => {
       ))}
     </ul>
   </div>
-)};
+);
 
 export default WordList;

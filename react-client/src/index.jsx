@@ -6,55 +6,73 @@ import WordList from './components/WordList.jsx';
 
 const gameId = Number(document.location.pathname.replace(/\//g,''));
 
-//////////////////////////
-//  SOCKET.IO SETTINGS  //
-//////////////////////////
-
-let curUser = `player${Math.round(Math.random() * 10000)}`;
-var getUser = prompt("Please enter your name", curUser);
-if (getUser != null) {
-  curUser = getUser;
-}
-
-
+const socket = io();
 const validate = text => {
   return text;
 }
+// socket.on('message', (msg) => {
+//   console.log(msg);
+// })
+
+
+//////////////////
+//  SOCKET.IO   //
+//////////////////
+
+// let curUser = `player${Math.round(Math.random() * 10000)}`;
+// var getUser = prompt("Please enter your name", curUser);
+// if (getUser != null) {
+//   curUser = getUser;
+// }
+
+let curUser = 'michelle';
 
 $(function () {
-  var socket = io();
+  //
+  // socket.on('message', function(msg){
+  //   // $('#messages').append($('<li>').text(msg));
+  //   console.log(`get ${msg}`);
+  // });
 
+  var socket = io();
+  // define submit callback
   $('form').submit(function(){
+    // socket.emit('chat message', 'hello');
     const curText = validate($('#inputText').val());
-    // socket.emit('chat message', curText);
     let myData = {
       id: gameId,
       user: curUser,
       text: curText
     };
-    console.log(myData);
-    console.log('----------sdfsdfs');
+
     $.ajax({
       method: 'POST',
       url: '/api/post',
       contentType: 'application/json',
       data: JSON.stringify(myData)
-    }).done(data => {
-      console.log(data);
+    }).done(() => {
+      $('#inputText').val('');
+      console.log(`emit "${curText}"`);
+      // io.emit('chatmessage', { for: 'everyone' });
+      socket.emit('chat message', curText);
     });
-    //
-    // $.post({
-    //   url: '/api/post',
-    //   data: myData,
-    //   success: data => {
-    //     console.log(data);
-    //   },
-    //   dataType: 'application/json'
-    // });
-
-    $('#inputText').val('');
     return false;
+  }); // end submit cb
+
+
+  socket.on('chat message', function(msg){
+    console.log(msg);
+    // $('#messages').append($('<li>').text(msg));
   });
+/*
+  socket.on('connect', function(){
+    console.log('socket.io connected');
+    socket.on('chat message', function(msg){
+      // $('#messages').append($('<li>').text(msg));
+      console.log(msg);
+    });
+  });*/
+
 });
 
 
@@ -72,6 +90,14 @@ class App extends React.Component {
   }
 
   componentDidMount() {
+    // debugger
+    console.log('component did mount');
+    // socket.on('message', msg => {
+    //   console.log(`get: ${msg}`);
+    //   this.state.moves.push(msg);
+    //   // debugger
+    // });
+
     $.ajax({
       url: '/api/get',
       data: {
