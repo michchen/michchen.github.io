@@ -10,7 +10,7 @@ module.exports.insertWord = (data, callback) => {
     { $push: {
       words: {
         user: data.user,
-        word: data.word
+        text: data.text,
       }
     } },
     { upsert: true },
