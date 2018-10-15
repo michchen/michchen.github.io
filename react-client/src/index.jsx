@@ -3,9 +3,10 @@ import ReactDOM from 'react-dom';
 import $ from 'jquery';
 import InputWord from './components/InputWord.jsx';
 import WordList from './components/WordList.jsx';
+import UserList from './components/UserList.jsx';
 
 let numUsers = 0;
-let userList = [];
+let curUser = `player${Math.round(Math.random() * 10000)}`;
 
 const gameId = document.location.pathname.replace(/\//g,'');
 
@@ -25,21 +26,20 @@ const nextUser = () => {
 //  SOCKET.IO   //
 //////////////////
 
-let curUser = 'michelle';
 var socket = io();
 
 $(function () {
 
-  socket.on('numUsers', count => {
-    // console.log(`${count} users`);
-    numUsers = count;
-  })
+  // socket.on('numUsers', count => {
+  //   // console.log(`${count} users`);
+  //   numUsers = count;
+  // })
 
   // input submit
   $('form').submit(function(){
     if (numUsers <= 1) {
-      alert('you are the only player. need 2+ to play');
-      return false;
+      // alert('you are the only player. need 2+ to play');
+      // return false;
     }
     const curText = validate($('#inputText').val());
     if (curText) {
@@ -57,7 +57,7 @@ $(function () {
       }).done(() => {
         $('#inputText').val('');
         console.log(`send message`);
-        socket.emit('chat message', {
+        socket.emit('message', {
           user: myData.user,
           text: myData.text
         });
@@ -79,7 +79,8 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      moves: []
+      moves: [],
+      users: {}
     };
   }
 
@@ -103,20 +104,31 @@ class App extends React.Component {
   }
 
   componentDidMount() {
+    let enteredUserName = prompt('Please enter your name', curUser);
+    if (enteredUserName && enteredUserName.trim().length > 0) {
+      curUser = enteredUserName;
+    }
+    socket.emit('addUser', curUser);
+
     let app = this;
     socket.on('server-message', msg => {
       console.log('get message ' + msg.text);
       app.getGame(app, gameId);
     });
 
-    // debugger
+    socket.on('userList', data => {
+      app.setState({users: data});
+      // console.log(app.state.users);
+    });
+
     this.getGame(this, gameId);
   }
 
   render() {
     return (<div>
-      <WordList movesList={this.state.moves}/>
       <InputWord />
+      <WordList movesList={this.state.moves}/>
+      <UserList userList={this.state.users}/>
     </div>);
   }
 }

@@ -8,8 +8,7 @@ const dotenv = require('dotenv').config();
 const PORT = process.env.PORT;
 
 var router = express.Router();
-
-let numUsers = 0;
+let socketList = {};
 
 ///////////////////
 //   ENDPOINTS   //
@@ -18,7 +17,6 @@ let numUsers = 0;
 app.use(bodyParser.json());
 
 app.use('/:id', express.static(__dirname + '/../react-client/dist'));
-
 
 app.get('/', (req, res) => {
   res.send('main page');
@@ -31,7 +29,7 @@ app.post('/api/post', bodyParser.json() , (req, res) => {
 });
 
 app.get('/api/get', (req, res) => {
-  ctrl.getWords(req.query, data => {
+  ctrl.getGame(req.query, data => {
     res.send(data)
   });
 });
@@ -41,19 +39,22 @@ app.get('/api/get', (req, res) => {
 ////////////////
 
 io.on('connection', function(socket){
-  numUsers++;
-  io.sockets.emit('numUsers', numUsers);
-  console.log(`a user connected! total: ${numUsers}`);
 
   socket.on('disconnect', function(){
-    numUsers--;
-    io.sockets.emit('numUsers', numUsers);
-    console.log(`a user disconnected. total: ${numUsers}`);
+    delete socketList[socket.client.id];
+    // console.log(socketList);
+    io.sockets.emit('userList', socketList);
   });
 
-  socket.on('chat message', function(data){
-    console.log(`received chat-message "${data.text}" on server`);
-    console.log(`emit server-message "${data.text}" on server`);
+  socket.on('addUser', user => {
+    socketList[socket.client.id] = user;
+    // console.log(socketList);
+    io.sockets.emit('userList', socketList);
+  });
+
+  socket.on('message', function(data){
+    // console.log(`received chat-message "${data.text}" on server`);
+    // console.log(`emit server-message "${data.text}" on server`);
     io.sockets.emit('server-message', data);
   });
 
