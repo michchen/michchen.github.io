@@ -49,7 +49,9 @@ io.on('connection', function(socket){
   });
 
   socket.on('chat message', function(data){
-    socket.emit('server-message', data);
+    console.log(`received chat-message "${data.text}" on server`);
+    console.log(`emit server-message "${data.text}" on server`);
+    io.sockets.emit('server-message', data);
   });
 
 });

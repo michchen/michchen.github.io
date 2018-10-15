@@ -58,6 +58,7 @@ $(function () {
 //////////////////////////
 
 class App extends React.Component {
+
   constructor(props) {
     super(props);
     this.state = {
@@ -65,30 +66,39 @@ class App extends React.Component {
     };
   }
 
-  componentDidMount() {
-    socket.on('server-message', (msg => {
-      let curMoves = this.state.moves ? this.state.moves : [];
-      curMoves.push(msg);
-      this.setState({
-        moves: curMoves
-      });
-    }).bind(this));
-
+  getGame(app, gameId) {
+    console.log('fn getGame');
     $.ajax({
       url: '/api/get',
       data: {
         id: gameId
       },
       method: 'get',
-      success: (data) => {
-        this.setState({
+      success: (data => {
+        app.setState({
           moves: data.moves
         });
-      },
+      }).bind(this),
       error: (err) => {
         console.log('err', err);
       }
     });
+  }
+
+  componentDidMount() {
+    socket.on('server-message', (msg => {
+      console.log('get message ' + msg.text);
+      this.getGame(this, gameId);
+
+      // let curMoves = this.state.moves ? this.state.moves : [];
+      // curMoves.push(msg);
+      // this.setState({
+      //   moves: curMoves
+      // });
+    }).bind(this));
+
+    // debugger
+    this.getGame(this, gameId);
   }
 
   render() {
