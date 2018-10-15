@@ -6,38 +6,22 @@ import WordList from './components/WordList.jsx';
 
 const gameId = Number(document.location.pathname.replace(/\//g,''));
 
-const socket = io();
+// const socket = io();
 const validate = text => {
   return text;
 }
-// socket.on('message', (msg) => {
-//   console.log(msg);
-// })
-
 
 //////////////////
 //  SOCKET.IO   //
 //////////////////
 
-// let curUser = `player${Math.round(Math.random() * 10000)}`;
-// var getUser = prompt("Please enter your name", curUser);
-// if (getUser != null) {
-//   curUser = getUser;
-// }
-
 let curUser = 'michelle';
+var socket = io();
 
 $(function () {
-  //
-  // socket.on('message', function(msg){
-  //   // $('#messages').append($('<li>').text(msg));
-  //   console.log(`get ${msg}`);
-  // });
+  // var socket = io('http://localhost',{'multiplex': false});
 
-  var socket = io();
-  // define submit callback
   $('form').submit(function(){
-    // socket.emit('chat message', 'hello');
     const curText = validate($('#inputText').val());
     let myData = {
       id: gameId,
@@ -52,26 +36,20 @@ $(function () {
       data: JSON.stringify(myData)
     }).done(() => {
       $('#inputText').val('');
-      console.log(`emit "${curText}"`);
-      // io.emit('chatmessage', { for: 'everyone' });
-      socket.emit('chat message', curText);
+
+      socket.emit('chat message', {
+        user: myData.user,
+        text: myData.text
+      });
     });
     return false;
   }); // end submit cb
 
 
-  socket.on('chat message', function(msg){
-    console.log(msg);
-    // $('#messages').append($('<li>').text(msg));
-  });
-/*
-  socket.on('connect', function(){
-    console.log('socket.io connected');
-    socket.on('chat message', function(msg){
-      // $('#messages').append($('<li>').text(msg));
-      console.log(msg);
-    });
-  });*/
+  // socket.on('server-message', function(msg){
+  //   console.log(`get "${msg}"`);
+  //
+  // });
 
 });
 
@@ -92,11 +70,19 @@ class App extends React.Component {
   componentDidMount() {
     // debugger
     console.log('component did mount');
-    // socket.on('message', msg => {
-    //   console.log(`get: ${msg}`);
-    //   this.state.moves.push(msg);
-    //   // debugger
-    // });
+    socket.on('server-message', msg => {
+      // console.log(msg);
+      // console.log(this.state);
+
+      // console.log(curMoves);
+      let curMoves = this.state.moves;
+      curMoves.push(msg);
+      this.setState({
+        moves: curMoves
+      });
+      // console.log(this.state.moves);
+      // debugger
+    });
 
     $.ajax({
       url: '/api/get',
@@ -105,7 +91,7 @@ class App extends React.Component {
       },
       method: 'get',
       success: (data) => {
-        console.log('/api/get: ', data);
+        // console.log('/api/get: ', data);
         this.setState({
           moves: data.moves
         });
