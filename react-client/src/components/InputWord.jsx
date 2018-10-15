@@ -1,9 +1,8 @@
 import React from 'react';
 
 const InputWord = (props) => (
-  <form action="">
-    <input placeholder="type a word" id="inputText"/>
-    <button>submit</button>
+  <form type="text" autoComplete="off">
+    <input placeholder="type a word & press enter to submit" id="inputText"/>
   </form>
 );
 

@@ -3,12 +3,11 @@ import Word from './Word.jsx';
 
 const WordList = (props) => (
   <div>
-    <h2>Build a sentence together!</h2>
-    <ul>
+    <div id="wordList">
       {props.movesList.map(item => (
         <Word moveData={item} />
       ))}
-    </ul>
+    </div>
   </div>
 );
 

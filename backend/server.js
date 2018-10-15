@@ -9,12 +9,19 @@ const PORT = process.env.PORT;
 
 var router = express.Router();
 
+let numUsers = 0;
+
 ///////////////////
 //   ENDPOINTS   //
 ///////////////////
 
 app.use(bodyParser.json());
 app.use('/:id', express.static(__dirname + '/../react-client/dist'));
+
+
+app.get('/', (req, res) => {
+  res.send('main page');
+});
 
 app.post('/api/post', bodyParser.json() , (req, res) => {
   ctrl.insertWord(req.body, data => {
@@ -33,15 +40,15 @@ app.get('/api/get', (req, res) => {
 ////////////////
 
 io.on('connection', function(socket){
-  console.log('a user connected');
+  numUsers++;
+  console.log(`a user connected! total: ${numUsers}`);
 
   socket.on('disconnect', function(){
-    console.log('user disconnected');
+    numUsers--;
+    console.log(`a user disconnected. total: ${numUsers}`);
   });
 
   socket.on('chat message', function(data){
-    // console.log(data);
-    console.log(`message (server): ${data}`);
     socket.emit('server-message', data);
   });
 
