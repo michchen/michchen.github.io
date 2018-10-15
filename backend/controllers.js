@@ -25,3 +25,6 @@ module.exports.getWords = (data, callback) => {
     callback(data[0]);
   });
 };
+
+// module.exports.insertWord = (data, callback) => {
+// }

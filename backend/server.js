@@ -16,6 +16,7 @@ let numUsers = 0;
 ///////////////////
 
 app.use(bodyParser.json());
+
 app.use('/:id', express.static(__dirname + '/../react-client/dist'));
 
 
@@ -41,10 +42,12 @@ app.get('/api/get', (req, res) => {
 
 io.on('connection', function(socket){
   numUsers++;
+  io.sockets.emit('numUsers', numUsers);
   console.log(`a user connected! total: ${numUsers}`);
 
   socket.on('disconnect', function(){
     numUsers--;
+    io.sockets.emit('numUsers', numUsers);
     console.log(`a user disconnected. total: ${numUsers}`);
   });
 

@@ -4,7 +4,10 @@ import $ from 'jquery';
 import InputWord from './components/InputWord.jsx';
 import WordList from './components/WordList.jsx';
 
-const gameId = Number(document.location.pathname.replace(/\//g,''));
+let numUsers = 0;
+let userList = [];
+
+const gameId = document.location.pathname.replace(/\//g,'');
 
 const validate = text => {
   if (text.trim().length > 0) {
@@ -12,6 +15,10 @@ const validate = text => {
   } else {
     return false;
   }
+}
+
+const nextUser = () => {
+
 }
 
 //////////////////
@@ -22,7 +29,18 @@ let curUser = 'michelle';
 var socket = io();
 
 $(function () {
+
+  socket.on('numUsers', count => {
+    // console.log(`${count} users`);
+    numUsers = count;
+  })
+
+  // input submit
   $('form').submit(function(){
+    if (numUsers <= 1) {
+      alert('you are the only player. need 2+ to play');
+      return false;
+    }
     const curText = validate($('#inputText').val());
     if (curText) {
       let myData = {
@@ -30,7 +48,6 @@ $(function () {
         user: curUser,
         text: curText
       };
-
 
       $.ajax({
         method: 'POST',
@@ -67,18 +84,18 @@ class App extends React.Component {
   }
 
   getGame(app, gameId) {
-    console.log('fn getGame');
+    console.log(`fn getGame(${gameId})`);
     $.ajax({
       url: '/api/get',
       data: {
         id: gameId
       },
-      method: 'get',
-      success: (data => {
+      method: 'GET',
+      success: data => {
         app.setState({
           moves: data.moves
         });
-      }).bind(this),
+      },
       error: (err) => {
         console.log('err', err);
       }
@@ -86,16 +103,11 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    socket.on('server-message', (msg => {
+    let app = this;
+    socket.on('server-message', msg => {
       console.log('get message ' + msg.text);
-      this.getGame(this, gameId);
-
-      // let curMoves = this.state.moves ? this.state.moves : [];
-      // curMoves.push(msg);
-      // this.setState({
-      //   moves: curMoves
-      // });
-    }).bind(this));
+      app.getGame(app, gameId);
+    });
 
     // debugger
     this.getGame(this, gameId);

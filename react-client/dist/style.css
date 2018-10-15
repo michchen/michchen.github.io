@@ -53,6 +53,11 @@ input, ::-webkit-input-placeholder, :-moz-placeholder, ::-moz-placeholder, :-ms-
   display: inline-block;
   /* font-size: 3em; */
   margin-right: 0.5em;
+  cursor: pointer;
+}
+
+.word:hover {
+  color:#606;
 }
 
 .wordUser {
