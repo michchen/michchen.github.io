@@ -8,14 +8,10 @@ const dotenv = require('dotenv').config();
 const PORT = process.env.PORT;
 
 var router = express.Router();
-let socketList = {};
-let userOrder = {};
-let curUser;
-let curGame;
 
+let curGame;
 let curUserIndex = 0;
 let userList = [];
-
 
 ///////////////////
 //   ENDPOINTS   //
@@ -37,7 +33,8 @@ app.post('/api/post', bodyParser.json() , (req, res) => {
 
 app.get('/api/get', (req, res) => {
   // curGame = req.query.id;
-  ctrl.getGame(req.query, data => {
+  // res.send(req.query.id)
+  ctrl.getGame(req.query.id, data => {
     res.send(data)
   });
 });
@@ -90,7 +87,9 @@ io.on('connection', function(socket){
     console.log('socket.emit(updateUserList,...');
     console.log(userList);
     // oct 15
-    socket.emit('updateUserList', {userList: userList, curUserIndex: curUserIndex});
+    let obj = {userList: userList, curUserIndex: curUserIndex};
+    // console.log(obj);
+    socket.emit('updateUserList', obj);
   });
 
   socket.on('message', function(){

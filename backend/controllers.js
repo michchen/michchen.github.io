@@ -18,7 +18,7 @@ module.exports.insertWord = (data, callback) => {
 };
 
 module.exports.getGame = (data, callback) => {
-  db.collections.games.find({_id: Number(data.id)}).toArray((err, data) => {
+  db.collections.games.find({_id: data.id}).toArray((err, data) => {
     callback(data[0]);
   });
 };

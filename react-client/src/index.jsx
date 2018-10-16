@@ -56,8 +56,8 @@ class App extends React.Component {
       },
       method: 'GET',
       success: data => {
-        console.log('-------------CALLBACK');
-        console.log(data);
+        // console.log('-------------CALLBACK');
+        // console.log(data);
         app.setState({
           moves: data.moves
         });
@@ -87,10 +87,9 @@ class App extends React.Component {
     });
 
     socket.on('updateUserList', data => {
-      console.log('updateUserList');
-      // console.log(data);
+      console.log('updateUserList', data);
       app.setState({
-        users: data,
+        users: data.userList,
         curUserIndex: data.curUserIndex
       });
     });
@@ -114,7 +113,7 @@ class App extends React.Component {
         $.ajax({
           method: 'POST',
           url: '/api/post',
-          contentType: 'application/json',
+          contentType: 'aepplication/json',
           data: JSON.stringify(myData)
         }).done(() => {
           $('#inputText').val('');
@@ -126,15 +125,12 @@ class App extends React.Component {
     }); // end submit cb
 
 
-
-
-
     this.getGame(this, gameId);
   }
 
   render() {
-    // console.log("RE RENDER");
-    // console.log(this.state);
+    console.log("RE RENDER---------");
+    console.log(this.state);
     return (<div>
       <InputWord />
       <WordList movesList={this.state.moves}/>
