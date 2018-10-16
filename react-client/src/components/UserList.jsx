@@ -2,6 +2,7 @@ import React from 'react';
 
 const UserList = (props) => {
   if (Object.values(props.userList).length > 0) {
+    console.log(props.curUser);
     return (
       <ul id="userList">
         {

@@ -9,6 +9,7 @@ const PORT = process.env.PORT;
 
 var router = express.Router();
 let socketList = {};
+let curUser;
 
 ///////////////////
 //   ENDPOINTS   //
@@ -42,13 +43,17 @@ io.on('connection', function(socket){
 
   socket.on('disconnect', function(){
     delete socketList[socket.client.id];
-    // console.log(socketList);
     io.sockets.emit('userList', socketList);
   });
 
   socket.on('addUser', user => {
+    if (Object.entries(socketList).length === 0) {
+        curUser = user;
+    }
+
     socketList[socket.client.id] = user;
-    // console.log(socketList);
+    console.log('curuser is '+curUser);
+    io.sockets.emit('curUser', curUser);
     io.sockets.emit('userList', socketList);
   });
 
