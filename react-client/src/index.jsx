@@ -23,7 +23,7 @@ const nextTurn = () => {
   let active = $('#userList .active');
   $('#userList .active').removeClass('active');
   active.next().addClass('active');
-  console.log(`current player is now ${active.text()}`);
+  // console.log(`current player is now ${active.text()}`);
 }
 
 //////////////////
@@ -71,23 +71,27 @@ class App extends React.Component {
     if (enteredUserName && enteredUserName.trim().length > 0) {
       curUser = enteredUserName;
     }
-    console.log('emit addUser', curUser);
+    // console.log('emit addUser', curUser);
     socket.emit('addUser', curUser);
 
     let app = this;
-    socket.on('server-message', msg => {
-      console.log('get message ' + msg.text);
-      nextTurn();
+    socket.on('server-message', data => {
+      // console.log('server-message ', data);
+      app.setState({
+        curUserIndex: data.curUserIndex
+      });
+      // console.log(this.state);
+
       app.getGame(app, gameId);
     });
 
     socket.on('userList', (data => {
-      console.log('index.jsx > on.userList');
-      console.log(data);
+      // console.log('index.jsx > on.userList');
+      // console.log(data);
       // console.log(data);
       this.setState({
         users: data.userList,
-        curUserIndex: data.curUserIndex
+        curUserIndex: data.curUser
       });
       // console.log(this.state);
     }).bind(this));
@@ -115,7 +119,7 @@ class App extends React.Component {
           data: JSON.stringify(myData)
         }).done(() => {
           $('#inputText').val('');
-          console.log(`send message`);
+          // console.log(`send message`);
           socket.emit('message', {
             user: myData.user,
             text: myData.text
@@ -133,12 +137,12 @@ class App extends React.Component {
   }
 
   render() {
-    console.log("RE RENDER");
-    console.log(this.state.users);
+    // console.log("RE RENDER");
+    // console.log(this.state);
     return (<div>
       <InputWord />
       <WordList movesList={this.state.moves}/>
-      <UserList userList={this.state.users} curUser={this.state.curUserIndex}/>
+      <UserList userList={this.state.users} curUserIndex={this.state.curUserIndex}/>
     </div>);
   }
 }

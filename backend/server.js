@@ -47,16 +47,15 @@ app.get('/api/get', (req, res) => {
 ////////////////
 
 const nextTurn = () => {
-  if (curUserIndex >= (userList.length - 1)) {
-    curUserIndex = 0;
+  if (curUserIndex < (userList.length - 1)) {
+    curUserIndex = curUserIndex + 1;
   } else {
-    curUserIndex++;
+    curUserIndex = 0;
   }
+
 }
 
 io.on('connection', function(socket){
-  // userOrder[curGame] = userOrder[curGame] || [];
-  // console.log(curGame);
 
   socket.on('disconnect', function(){
     // store index of current user as curUserIndex
@@ -77,15 +76,13 @@ io.on('connection', function(socket){
 
       userList.splice(disconnectingIndex, 1);
 
-      console.log(`user #${disconnectingIndex} disconnected`);
-      // console.log(userList);
+      // console.log(`user #${disconnectingIndex} disconnected`);
       socket.emit('userList', userList);
-      // io.socket.emit('userList', userList);
     }
   });
 
   socket.on('addUser', user => {
-    console.log('server.js > on.addUser');
+    // console.log('server.js > on.addUser');
     // if first user in room, no need to do anything bc curUserIndex is already 0
     // pretty much just push user tuple to userList
 
@@ -94,22 +91,20 @@ io.on('connection', function(socket){
       user              // user's name
     ]);
 
-    console.log(`user ${user} connected`);
-    console.log(userList);
-
     socket.emit('userList', {userList: userList, curUserIndex: curUserIndex});
-    // socket.emit('userList', {userList: userList, curUserIndex: curUserIndex});
   });
 
   socket.on('message', function(data){
 
     // 'message' is emitted in the cb of POST
     // server-message triggers app.getGame (which updates based one GET)
-    io.sockets.emit('server-message', data);
 
+    // let temp = curUserIndex;
     nextTurn();
-    io.sockets.emit('curUserIndex', curUserIndex);
-
+    io.sockets.emit('server-message', {
+      text: data,
+      curUserIndex: curUserIndex,
+    });
   });
 
 });

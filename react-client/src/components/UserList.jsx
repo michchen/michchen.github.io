@@ -1,8 +1,7 @@
 import React from 'react';
 
 const UserList = (props) => {
-  console.log('USERLIST');
-  console.log(props);
+  console.log('RERENDER USERLIST', props);
   if (props.userList.length > 0) {
     return (
       <ul id="userList">
