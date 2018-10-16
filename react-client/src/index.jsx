@@ -71,10 +71,7 @@ class App extends React.Component {
     if (enteredUserName && enteredUserName.trim().length > 0) {
       curUser = enteredUserName;
     }
-    // console.log('emit addUser', curUser);
-    socket.on('newUser', () => {
-      socket.emit('addUser', curUser);
-    })
+    console.log('emit addUser', curUser);
     socket.emit('addUser', curUser);
 
     let app = this;
@@ -84,12 +81,11 @@ class App extends React.Component {
       });
     });
 
-    socket.on('userList', data => {
-      // console.log('index.jsx > on.userList');
-      // console.log(data.curUserIndex);
-      console.log(data.userList);
+    socket.on('updateUserList', data => {
+      console.log('updateUserList');
+      console.log(data);
       app.setState({
-        users: data.userList,
+        users: data,
         curUserIndex: data.curUserIndex
       });
     });
@@ -117,18 +113,8 @@ class App extends React.Component {
           data: JSON.stringify(myData)
         }).done(() => {
           $('#inputText').val('');
-
-          socket.emit('message', {
-          //   user: myData.user,
-          //   text: myData.text
-          });
-          // console.log(app);
-          // debugger
-          // app.setState({
-          //   curUserIndex: data.curUserIndex
-          // });
+          socket.emit('message');
           app.getGame(app, gameId);
-
         });
       }
       return false;

@@ -56,7 +56,7 @@ const nextTurn = () => {
 }
 
 io.on('connection', function(socket){
-  socket.emit('newUser')
+  socket.emit('updateUserList', userList)
 
   socket.on('disconnect', function(){
     // store index of current user as curUserIndex
@@ -76,28 +76,26 @@ io.on('connection', function(socket){
       }
 
       userList.splice(disconnectingIndex, 1);
-
       // console.log(`user #${disconnectingIndex} disconnected`);
-      socket.emit('userList', userList);
+      socket.emit('updateUserList', userList);
     }
   });
 
   socket.on('addUser', user => {
     console.log('server.js > on.addUser');
-    // if first user in room, no need to do anything bc curUserIndex is already 0
-    // pretty much just push user tuple to userList
-
     userList.push([
       socket.client.id, // unique id
       user              // user's name
     ]);
-
-    socket.emit('userList', {userList: userList, curUserIndex: curUserIndex});
+    console.log('socket.emit(updateUserList,...');
+    console.log(userList);
+    // oct 15
+    socket.emit('updateUserList', {userList: userList, curUserIndex: curUserIndex});
   });
 
   socket.on('message', function(){
     nextTurn();
-    io.sockets.emit('server-nextUser', curUserIndex);
+    socket.emit('server-nextUser', curUserIndex);
   });
 
 });
