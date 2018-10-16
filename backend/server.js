@@ -39,6 +39,17 @@ app.get('/api/get', (req, res) => {
   });
 });
 
+// HELPER FUNCTIONS //
+
+const nextTurn = () => {
+  if (curUserIndex < (userList.length - 1)) {
+    curUserIndex = curUserIndex + 1;
+  } else {
+    curUserIndex = 0;
+  }
+}
+
+
 ////////////////
 //   SERVER   //
 ////////////////
@@ -85,6 +96,7 @@ io.on('connection', function(socket){
   socket.on('chat message', function(data){
     console.log(`received chat-message "${data.text}" on server`);
     console.log(`emit server-message "${data.text}" on server`);
+    nextTurn();
     io.sockets.emit('server-message', data);
     io.sockets.emit('server-nextUser', curUserIndex);
   });

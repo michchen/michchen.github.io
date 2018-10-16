@@ -117,17 +117,22 @@ class App extends React.Component {
 
     socket.on('updateUserList', data => {
       console.log("UPDATE USER LIST");
-      console.log(data.userList);
       app.setState({
         users: data.userList,
         curUserIndex: data.curUserIndex
       });
     });
 
+
     socket.on('server-message', msg => {
       console.log('get message ' + msg.text);
       app.getGame(app, gameId);
     });
+
+    socket.on('server-nextUser', data => {
+      console.log(`server-nextUser: ${data}`);
+    });
+
 
     // debugger
     this.getGame(this, gameId);
