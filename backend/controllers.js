@@ -2,8 +2,11 @@ const Game = require('./models/Game.js');
 const db = require('./database');
 
 module.exports.insertWord = (data, callback) => {
+  // console.log('controllers > Word > insertWord');
+  // console.log(data);
+
   db.collections.games.update(
-    { _id: data.id },
+    { _id: Number(data.id) },
     { $push: {
       moves: {
         user: data.user,
@@ -17,8 +20,11 @@ module.exports.insertWord = (data, callback) => {
   );
 };
 
-module.exports.getGame = (roomId, callback) => {
-  db.collections.games.find({_id: roomId}).toArray((err, data) => {
+module.exports.getWords = (data, callback) => {
+  db.collections.games.find({_id: Number(data.id)}).toArray((err, data) => {
     callback(data[0]);
   });
 };
+
+// module.exports.insertWord = (data, callback) => {
+// }

@@ -9,9 +9,11 @@ const PORT = process.env.PORT;
 
 var router = express.Router();
 
+
 let curGame;
 let curUserIndex = 0;
 let userList = [];
+let curUserHash = '';
 
 ///////////////////
 //   ENDPOINTS   //
@@ -20,6 +22,7 @@ let userList = [];
 app.use(bodyParser.json());
 
 app.use('/:id', express.static(__dirname + '/../react-client/dist'));
+
 
 app.get('/', (req, res) => {
   res.send('main page');
@@ -32,37 +35,39 @@ app.post('/api/post', bodyParser.json() , (req, res) => {
 });
 
 app.get('/api/get', (req, res) => {
-  // curGame = req.query.id;
-  // res.send(req.query.id)
-  ctrl.getGame(req.query.id, data => {
+  ctrl.getWords(req.query, data => {
     res.send(data)
   });
 });
+
+// HELPER FUNCTIONS //
+
+const nextTurn = () => {
+  console.log('NEXT TURN');
+  let temp = curUserIndex
+  curUserIndex++;
+  if (curUserIndex >= userList.length) {
+    curUserIndex = 0;
+  }
+  console.log(userList);
+  console.log(`user index changes from ${temp} --> ${curUserIndex}`);
+  if (userList[curUserIndex]) {
+    curUserHash = userList[curUserIndex][0];
+  }
+}
+
 
 ////////////////
 //   SERVER   //
 ////////////////
 
-const nextTurn = () => {
-  if (curUserIndex < (userList.length - 1)) {
-    curUserIndex = curUserIndex + 1;
-  } else {
-    curUserIndex = 0;
-  }
-
-}
-
-io.sockets.on('connection', function(socket){
-  socket.emit('updateUserList', userList)
+io.on('connection', function(socket){
+  console.log(`a user connected!`);
+  // console.log(userList);
 
   socket.on('disconnect', function(){
-    console.log('disconnect');
-    // store index of current user as curUserIndex
-
-    // if curUserIndex is greater or equal to the index of current user
-      // do nothing, because splicing current user would essentially move curUserIndex to the next user
-    // else
-      // increment curUserIndex
+    console.log(`a user disconnected.`);
+    console.log(userList);
 
     let disconnectingIndex = userList.findIndex(
       tuple => (tuple[0] === socket.client.id)
@@ -73,10 +78,18 @@ io.sockets.on('connection', function(socket){
         curUserIndex++;
       }
 
+      if (curUserIndex === disconnectingIndex) {
+        nextTurn();
+      }
+
       userList.splice(disconnectingIndex, 1);
-      // console.log(`user #${disconnectingIndex} disconnected`);
-      socket.emit('updateUserList', userList);
+
+      io.sockets.emit(
+        'updateUserList',
+        {userList: userList, curUserIndex: curUserIndex, curUserHash: curUserHash}
+      );
     }
+
   });
 
   socket.on('addUser', user => {
@@ -85,18 +98,22 @@ io.sockets.on('connection', function(socket){
       socket.client.id, // unique id
       user              // user's name
     ]);
-    console.log('socket.emit(updateUserList,...');
-    console.log(userList);
-    // oct 15
-    let obj = {userList: userList, curUserIndex: curUserIndex};
-    // console.log(obj);
-    socket.emit('updateUserList', obj);
+    console.log(`curUserIndex: ${curUserIndex}`);
+    curUserHash = userList[curUserIndex][0];
+    io.sockets.emit(
+      'updateUserList',
+      {userList: userList, curUserIndex: curUserIndex, curUserHash: curUserHash}
+    );
   });
 
-  socket.on('message', function(){
-    console.log('RECEIVED MESSAGE. EMIT BACK TO CLIENT');
-    // nextTurn();
-    // io.sockets.emit('server-nextUser', curUserIndex);
+  socket.on('chat message', function(data){
+    console.log(`received chat-message "${data.text}" on server`);
+    console.log(`emit server-message "${data.text}" on server`);
+    nextTurn();
+    io.sockets.emit('server-message', data);
+    console.log(curUserIndex);
+
+    io.sockets.emit('server-nextUser', {curUserIndex: curUserIndex, curUserHash: curUserHash});
   });
 
 });

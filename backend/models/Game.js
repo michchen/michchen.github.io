@@ -4,7 +4,6 @@ const db = require('../database');
 const gameSchema = mongoose.Schema({
   _id: Number,
   moves: Array,
-  users: Array
 });
 
 const Game = mongoose.model('Game', gameSchema);
