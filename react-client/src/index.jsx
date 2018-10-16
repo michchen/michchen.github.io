@@ -43,12 +43,12 @@ class App extends React.Component {
     this.state = {
       moves: [],
       users: [],
-      curUserIndex: null
+      curUserIndex: 0
     };
   }
 
   getGame(app, gameId) {
-    // console.log(`fn getGame(${gameId})`);
+    console.log(`fn getGame(${gameId})`);
     $.ajax({
       url: '/api/get',
       data: {
@@ -72,29 +72,27 @@ class App extends React.Component {
       curUser = enteredUserName;
     }
     // console.log('emit addUser', curUser);
+    socket.on('newUser', () => {
+      socket.emit('addUser', curUser);
+    })
     socket.emit('addUser', curUser);
 
     let app = this;
-    socket.on('server-message', data => {
-      // console.log('server-message ', data);
+    socket.on('server-nextUser', data => {
       app.setState({
-        curUserIndex: data.curUserIndex
+        curUserIndex: data
       });
-      // console.log(this.state);
-
-      app.getGame(app, gameId);
     });
 
-    socket.on('userList', (data => {
+    socket.on('userList', data => {
       // console.log('index.jsx > on.userList');
-      // console.log(data);
-      // console.log(data);
-      this.setState({
+      // console.log(data.curUserIndex);
+      console.log(data.userList);
+      app.setState({
         users: data.userList,
-        curUserIndex: data.curUser
+        curUserIndex: data.curUserIndex
       });
-      // console.log(this.state);
-    }).bind(this));
+    });
 
 
     // submit word callback
@@ -119,11 +117,18 @@ class App extends React.Component {
           data: JSON.stringify(myData)
         }).done(() => {
           $('#inputText').val('');
-          // console.log(`send message`);
+
           socket.emit('message', {
-            user: myData.user,
-            text: myData.text
+          //   user: myData.user,
+          //   text: myData.text
           });
+          // console.log(app);
+          // debugger
+          // app.setState({
+          //   curUserIndex: data.curUserIndex
+          // });
+          app.getGame(app, gameId);
+
         });
       }
       return false;

@@ -56,6 +56,7 @@ const nextTurn = () => {
 }
 
 io.on('connection', function(socket){
+  socket.emit('newUser')
 
   socket.on('disconnect', function(){
     // store index of current user as curUserIndex
@@ -82,7 +83,7 @@ io.on('connection', function(socket){
   });
 
   socket.on('addUser', user => {
-    // console.log('server.js > on.addUser');
+    console.log('server.js > on.addUser');
     // if first user in room, no need to do anything bc curUserIndex is already 0
     // pretty much just push user tuple to userList
 
@@ -94,17 +95,9 @@ io.on('connection', function(socket){
     socket.emit('userList', {userList: userList, curUserIndex: curUserIndex});
   });
 
-  socket.on('message', function(data){
-
-    // 'message' is emitted in the cb of POST
-    // server-message triggers app.getGame (which updates based one GET)
-
-    // let temp = curUserIndex;
+  socket.on('message', function(){
     nextTurn();
-    io.sockets.emit('server-message', {
-      text: data,
-      curUserIndex: curUserIndex,
-    });
+    io.sockets.emit('server-nextUser', curUserIndex);
   });
 
 });
