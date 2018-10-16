@@ -78,12 +78,14 @@ io.on('connection', function(socket){
       userList.splice(disconnectingIndex, 1);
 
       console.log(`user #${disconnectingIndex} disconnected`);
-      console.log(userList);
-      io.sockets.emit('userList', userList);
+      // console.log(userList);
+      socket.emit('userList', userList);
+      // io.socket.emit('userList', userList);
     }
   });
 
   socket.on('addUser', user => {
+    console.log('server.js > on.addUser');
     // if first user in room, no need to do anything bc curUserIndex is already 0
     // pretty much just push user tuple to userList
 
@@ -95,7 +97,8 @@ io.on('connection', function(socket){
     console.log(`user ${user} connected`);
     console.log(userList);
 
-    io.sockets.emit('userList', {userList: userList, curUserIndex: curUserIndex});
+    socket.emit('userList', {userList: userList, curUserIndex: curUserIndex});
+    // socket.emit('userList', {userList: userList, curUserIndex: curUserIndex});
   });
 
   socket.on('message', function(data){

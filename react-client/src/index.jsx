@@ -71,6 +71,7 @@ class App extends React.Component {
     if (enteredUserName && enteredUserName.trim().length > 0) {
       curUser = enteredUserName;
     }
+    console.log('emit addUser', curUser);
     socket.emit('addUser', curUser);
 
     let app = this;
@@ -81,12 +82,14 @@ class App extends React.Component {
     });
 
     socket.on('userList', (data => {
+      console.log('index.jsx > on.userList');
       console.log(data);
+      // console.log(data);
       this.setState({
         users: data.userList,
         curUserIndex: data.curUserIndex
       });
-      console.log(this.state);
+      // console.log(this.state);
     }).bind(this));
 
 
