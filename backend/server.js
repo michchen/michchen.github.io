@@ -43,13 +43,14 @@ app.get('/api/get', (req, res) => {
 // HELPER FUNCTIONS //
 
 const nextTurn = () => {
-  // console.log(curUserIndex);
+  console.log('NEXT TURN');
+  console.log(curUserIndex);
   curUserIndex++;
   if (curUserIndex >= userList.length) {
     curUserIndex = 0;
   }
   curUserHash = userList[curUserIndex][0];
-  // console.log(curUserIndex);
+  console.log(curUserIndex);
 }
 
 
@@ -65,7 +66,6 @@ io.on('connection', function(socket){
     console.log(`a user disconnected.`);
     console.log(userList);
 
-
     let disconnectingIndex = userList.findIndex(
       tuple => (tuple[0] === socket.client.id)
     );
@@ -75,6 +75,9 @@ io.on('connection', function(socket){
         curUserIndex++;
       }
       userList.splice(disconnectingIndex, 1);
+      if (curUserIndex === disconnectingIndex) {
+        nextTurn();
+      }
       io.sockets.emit(
         'updateUserList',
         {userList: userList, curUserIndex: curUserIndex, curUserHash: curUserHash}

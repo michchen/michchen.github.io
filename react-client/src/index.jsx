@@ -5,8 +5,9 @@ import InputWord from './components/InputWord.jsx';
 import WordList from './components/WordList.jsx';
 import UserList from './components/UserList.jsx';
 
-let numUsers = 0;
 let userList = [];
+let myUser = 'player' + Math.round(Math.random() * 10000);
+let myHash;
 
 const gameId = document.location.pathname.replace(/\//g,'');
 
@@ -18,26 +19,11 @@ const validate = text => {
   }
 }
 
-const nextUser = () => {
-
-}
-
 //////////////////
 //  SOCKET.IO   //
 //////////////////
 
-let curUser = 'player' + Math.round(Math.random() * 10000);
 var socket = io();
-
-$(function () {
-
-  socket.on('numUsers', count => {
-    // console.log(`${count} users`);
-    numUsers = count;
-  })
-});
-
-
 
 //////////////////////////
 //   REACT COMPONENTS   //
@@ -77,15 +63,17 @@ class App extends React.Component {
   componentDidMount() {
     let app = this;
 
-    let enteredUserName = prompt('Please enter your name', curUser);
+    let enteredUserName = prompt('Please enter your name', myUser);
     if (enteredUserName && enteredUserName.trim().length > 0) {
-      curUser = enteredUserName;
+      myUser = enteredUserName;
     }
 
-    socket.emit('addUser', curUser);
+    socket.emit('addUser', myUser);
 
     socket.on('updateUserList', data => {
       console.log("UPDATE USER LIST");
+      myHash = myHash || data.userList[data.curUserIndex[0]];
+      console.log(myHash);
       app.setState({
         users: data.userList,
         curUserIndex: data.curUserIndex,
@@ -137,7 +125,7 @@ class App extends React.Component {
         if (curText) {
           let myData = {
             id: gameId,
-            user: curUser,
+            user: myUser,
             text: curText
           };
 
