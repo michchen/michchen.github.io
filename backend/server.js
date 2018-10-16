@@ -61,7 +61,7 @@ io.on('connection', function(socket){
         curUserIndex++;
       }
       userList.splice(disconnectingIndex, 1);
-      socket.emit(
+      io.sockets.emit(
         'updateUserList',
         {userList: userList, curUserIndex: curUserIndex}
       );
@@ -76,7 +76,7 @@ io.on('connection', function(socket){
       user              // user's name
     ]);
     console.log(userList);
-    socket.emit(
+    io.sockets.emit(
       'updateUserList',
       {userList: userList, curUserIndex: curUserIndex}
     );
