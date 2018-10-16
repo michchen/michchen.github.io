@@ -45,6 +45,7 @@ app.get('/api/get', (req, res) => {
 
 io.on('connection', function(socket){
   console.log(`a user connected!`);
+  // console.log(userList);
 
   socket.on('disconnect', function(){
     console.log(`a user disconnected.`);
@@ -60,7 +61,10 @@ io.on('connection', function(socket){
         curUserIndex++;
       }
       userList.splice(disconnectingIndex, 1);
-      socket.emit('updateUserList', {userList: userList, curUserIndex: curUserIndex});
+      socket.emit(
+        'updateUserList',
+        {userList: userList, curUserIndex: curUserIndex}
+      );
     }
 
   });
@@ -72,7 +76,10 @@ io.on('connection', function(socket){
       user              // user's name
     ]);
     console.log(userList);
-    socket.emit('updateUserList', {userList: userList, curUserIndex: curUserIndex});
+    socket.emit(
+      'updateUserList',
+      {userList: userList, curUserIndex: curUserIndex}
+    );
   });
 
   socket.on('chat message', function(data){

@@ -80,7 +80,9 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      moves: []
+      moves: [],
+      users: [],
+      curUserIndex: 0
     };
   }
 
@@ -94,7 +96,7 @@ class App extends React.Component {
       method: 'GET',
       success: data => {
         app.setState({
-          moves: data.moves
+          moves: data.moves || []
         });
       },
       error: (err) => {
