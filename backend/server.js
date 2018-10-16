@@ -44,13 +44,16 @@ app.get('/api/get', (req, res) => {
 
 const nextTurn = () => {
   console.log('NEXT TURN');
-  console.log(curUserIndex);
+  let temp = curUserIndex
   curUserIndex++;
   if (curUserIndex >= userList.length) {
     curUserIndex = 0;
   }
-  curUserHash = userList[curUserIndex][0];
-  console.log(curUserIndex);
+  console.log(userList);
+  console.log(`user index changes from ${temp} --> ${curUserIndex}`);
+  if (userList[curUserIndex]) {
+    curUserHash = userList[curUserIndex][0];
+  }
 }
 
 
@@ -74,10 +77,13 @@ io.on('connection', function(socket){
       if (curUserIndex < disconnectingIndex) {
         curUserIndex++;
       }
-      userList.splice(disconnectingIndex, 1);
+
       if (curUserIndex === disconnectingIndex) {
         nextTurn();
       }
+
+      userList.splice(disconnectingIndex, 1);
+
       io.sockets.emit(
         'updateUserList',
         {userList: userList, curUserIndex: curUserIndex, curUserHash: curUserHash}
