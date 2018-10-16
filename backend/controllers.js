@@ -3,7 +3,7 @@ const db = require('./database');
 
 module.exports.insertWord = (data, callback) => {
   db.collections.games.update(
-    { _id: Number(data.id) },
+    { _id: data.id },
     { $push: {
       moves: {
         user: data.user,
@@ -17,16 +17,8 @@ module.exports.insertWord = (data, callback) => {
   );
 };
 
-module.exports.getGame = (data, callback) => {
-  db.collections.games.find({_id: data.id}).toArray((err, data) => {
+module.exports.getGame = (roomId, callback) => {
+  db.collections.games.find({_id: roomId}).toArray((err, data) => {
     callback(data[0]);
   });
 };
-
-// module.exports.modifyUsers = (action, user) => {
-//   if (action === 'add') {
-//     db.collections.games.find({_id: Number(data.id)})
-//   } else if (action === 'remove') {
-//
-//   }
-// }

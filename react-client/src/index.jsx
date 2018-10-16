@@ -30,7 +30,8 @@ const nextTurn = () => {
 //  SOCKET.IO   //
 //////////////////
 
-var socket = io();
+const socket = io();
+// const socket = io.connect('http://localhost');
 
 //////////////////////////
 //   REACT COMPONENTS   //
@@ -56,7 +57,7 @@ class App extends React.Component {
       },
       method: 'GET',
       success: data => {
-        // console.log('-------------CALLBACK');
+        // console.log('-------------GETGAME CALLBACK');
         // console.log(data);
         app.setState({
           moves: data.moves
@@ -73,8 +74,10 @@ class App extends React.Component {
     if (enteredUserName && enteredUserName.trim().length > 0) {
       curUser = enteredUserName;
     }
-    // console.log('emit addUser', curUser);
+
+    // working
     socket.emit('addUser', curUser);
+    socket.emit('message');
 
     let app = this;
 
@@ -93,15 +96,21 @@ class App extends React.Component {
         curUserIndex: data.curUserIndex
       });
     });
+    //
+    // socket.on('message', () => {
+    //   console.log('on message (client)');
+    //   socket.emit('message');
+    // });
 
     // submit word callback
-
     $('form').submit(function(){
-      console.log(app.state.users);
-      if (Object.entries(app.state.users).length <= 1) {
-        alert('you are the only player. need 2+ to play');
-        return false;
-      }
+
+      // this was making page refresh???
+      // if (Object.entries(app.state.users).length <= 1) {
+      //   alert('you are the only player. need 2+ to play');
+      //   return false;
+      // }
+
       const curText = validate($('#inputText').val());
       if (curText) {
         let myData = {
@@ -109,15 +118,21 @@ class App extends React.Component {
           user: curUser,
           text: curText
         };
-
+        console.log("FORM SUBMIT MYDATA");
+        console.log(myData);
         $.ajax({
           method: 'POST',
           url: '/api/post',
-          contentType: 'aepplication/json',
+          contentType: 'application/json',
           data: JSON.stringify(myData)
         }).done(() => {
           $('#inputText').val('');
+          console.log('emit message');
+
+          // this is not working:
           socket.emit('message');
+          // socket.emit('test');
+
           app.getGame(app, gameId);
         });
       }
@@ -129,8 +144,8 @@ class App extends React.Component {
   }
 
   render() {
-    console.log("RE RENDER---------");
-    console.log(this.state);
+    // console.log("RE RENDER---------");
+    // console.log(this.state);
     return (<div>
       <InputWord />
       <WordList movesList={this.state.moves}/>

@@ -52,10 +52,11 @@ const nextTurn = () => {
 
 }
 
-io.on('connection', function(socket){
+io.sockets.on('connection', function(socket){
   socket.emit('updateUserList', userList)
 
   socket.on('disconnect', function(){
+    console.log('disconnect');
     // store index of current user as curUserIndex
 
     // if curUserIndex is greater or equal to the index of current user
@@ -93,9 +94,9 @@ io.on('connection', function(socket){
   });
 
   socket.on('message', function(){
-    nextTurn();
     console.log('RECEIVED MESSAGE. EMIT BACK TO CLIENT');
-    io.sockets.emit('server-nextUser', curUserIndex);
+    // nextTurn();
+    // io.sockets.emit('server-nextUser', curUserIndex);
   });
 
 });
