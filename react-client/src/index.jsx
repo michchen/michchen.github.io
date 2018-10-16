@@ -56,6 +56,8 @@ class App extends React.Component {
       },
       method: 'GET',
       success: data => {
+        console.log('-------------CALLBACK');
+        console.log(data);
         app.setState({
           moves: data.moves
         });
@@ -71,29 +73,32 @@ class App extends React.Component {
     if (enteredUserName && enteredUserName.trim().length > 0) {
       curUser = enteredUserName;
     }
-    console.log('emit addUser', curUser);
+    // console.log('emit addUser', curUser);
     socket.emit('addUser', curUser);
 
     let app = this;
+
     socket.on('server-nextUser', data => {
+      console.log('SERVER-NEXTUSER');
       app.setState({
         curUserIndex: data
       });
+      app.getGame(app, gameId);
     });
 
     socket.on('updateUserList', data => {
       console.log('updateUserList');
-      console.log(data);
+      // console.log(data);
       app.setState({
         users: data,
         curUserIndex: data.curUserIndex
       });
     });
 
-
     // submit word callback
 
     $('form').submit(function(){
+      console.log(app.state.users);
       if (Object.entries(app.state.users).length <= 1) {
         alert('you are the only player. need 2+ to play');
         return false;

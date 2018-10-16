@@ -95,7 +95,8 @@ io.on('connection', function(socket){
 
   socket.on('message', function(){
     nextTurn();
-    socket.emit('server-nextUser', curUserIndex);
+    console.log('RECEIVED MESSAGE. EMIT BACK TO CLIENT');
+    io.sockets.emit('server-nextUser', curUserIndex);
   });
 
 });
