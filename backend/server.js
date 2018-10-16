@@ -13,6 +13,7 @@ var router = express.Router();
 let curGame;
 let curUserIndex = 0;
 let userList = [];
+let curUserHash = '';
 
 ///////////////////
 //   ENDPOINTS   //
@@ -47,6 +48,7 @@ const nextTurn = () => {
   if (curUserIndex >= userList.length) {
     curUserIndex = 0;
   }
+  curUserHash = userList[curUserIndex][0];
   // console.log(curUserIndex);
 }
 
@@ -75,7 +77,7 @@ io.on('connection', function(socket){
       userList.splice(disconnectingIndex, 1);
       io.sockets.emit(
         'updateUserList',
-        {userList: userList, curUserIndex: curUserIndex}
+        {userList: userList, curUserIndex: curUserIndex, curUserHash: curUserHash}
       );
     }
 
@@ -88,9 +90,10 @@ io.on('connection', function(socket){
       user              // user's name
     ]);
     console.log(userList);
+    curUserHash = userList[curUserIndex][0];
     io.sockets.emit(
       'updateUserList',
-      {userList: userList, curUserIndex: curUserIndex}
+      {userList: userList, curUserIndex: curUserIndex, curUserHash: curUserHash}
     );
   });
 
@@ -100,8 +103,8 @@ io.on('connection', function(socket){
     nextTurn();
     io.sockets.emit('server-message', data);
     console.log(curUserIndex);
-    
-    io.sockets.emit('server-nextUser', curUserIndex);
+
+    io.sockets.emit('server-nextUser', {curUserIndex: curUserIndex, curUserHash: curUserHash});
   });
 
 });

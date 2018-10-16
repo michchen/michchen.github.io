@@ -50,7 +50,8 @@ class App extends React.Component {
     this.state = {
       moves: [],
       users: [],
-      curUserIndex: 0
+      curUserIndex: 0,
+      curUserHash: ''
     };
   }
 
@@ -87,10 +88,10 @@ class App extends React.Component {
       console.log("UPDATE USER LIST");
       app.setState({
         users: data.userList,
-        curUserIndex: data.curUserIndex
+        curUserIndex: data.curUserIndex,
+        curUserHash: data.curUserHash
       });
     });
-
 
     socket.on('server-message', msg => {
       console.log('get message ' + msg.text);
@@ -100,7 +101,8 @@ class App extends React.Component {
     socket.on('server-nextUser', data => {
       console.log(`server-nextUser: ${data}`);
       app.setState({
-        curUserIndex: data
+        curUserIndex: data.curUserIndex,
+        curUserHash: data.curUserHash
       })
     });
 
@@ -116,8 +118,21 @@ class App extends React.Component {
           alert('you are the only player. need 2+ to play');
           return false;
         // } else if (app.state.curUserIndex) {
-
         }
+
+
+        // if it's not your turn
+
+        // currently my state has moves, users, and curUserIndex
+        // console.log($('#userList li').eq(curUserIndex).text(), curUser)
+        // i would like the curUserHash as well
+        // else if () {
+        //   alert('not your turn');
+        //   return false;
+        // }
+
+
+
         const curText = validate($('#inputText').val());
         if (curText) {
           let myData = {
@@ -149,7 +164,7 @@ class App extends React.Component {
     console.log(this.state);
     return (<div>
       <WordList movesList={this.state.moves}/>
-      <UserList userList={this.state.users} curUserIndex={this.state.curUserIndex}/>
+      <UserList userList={this.state.users} curUserHash={this.state.curUserHash}/>
       <InputWord />
     </div>);
   }
