@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import $ from 'jquery';
 import InputWord from './components/InputWord.jsx';
 import WordList from './components/WordList.jsx';
+import UserList from './components/UserList.jsx';
 
 let numUsers = 0;
 let userList = [];
@@ -104,6 +105,17 @@ class App extends React.Component {
 
   componentDidMount() {
     let app = this;
+
+    socket.emit('addUser', curUser);
+
+    socket.on('updateUserList', data => {
+      console.log("UPDATE USER LIST");
+      app.setState({
+        users: data.userList,
+        curUserIndex: data.curUserIndex
+      });
+    });
+
     socket.on('server-message', msg => {
       console.log('get message ' + msg.text);
       app.getGame(app, gameId);
@@ -114,8 +126,10 @@ class App extends React.Component {
   }
 
   render() {
+    console.log(this.state);
     return (<div>
       <WordList movesList={this.state.moves}/>
+      <UserList userList={this.state.users} curUserIndex={this.state.curUserIndex}/>
       <InputWord />
     </div>);
   }

@@ -9,7 +9,6 @@ const PORT = process.env.PORT;
 
 var router = express.Router();
 
-let numUsers = 0;
 
 let curGame;
 let curUserIndex = 0;
@@ -45,17 +44,12 @@ app.get('/api/get', (req, res) => {
 ////////////////
 
 io.on('connection', function(socket){
-  numUsers++;
-  io.sockets.emit('updateUserList', userList);
-  console.log(`a user connected! total: ${numUsers}`);
-  console.log(userList);
+  console.log(`a user connected!`);
 
   socket.on('disconnect', function(){
-    numUsers--;
     io.sockets.emit('updateUserList', userList);
-    console.log(`a user disconnected. total: ${numUsers}`);
+    console.log(`a user disconnected.`);
     console.log(userList);
-    // io.sockets.emit('numUsers', numUsers);
 
 
     let disconnectingIndex = userList.findIndex(
@@ -79,7 +73,6 @@ io.on('connection', function(socket){
       socket.client.id, // unique id
       user              // user's name
     ]);
-    console.log('socket.emit(updateUserList,...');
     console.log(userList);
     // oct 15
     let obj = {userList: userList, curUserIndex: curUserIndex};
