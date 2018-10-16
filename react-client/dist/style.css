@@ -63,3 +63,7 @@ input, ::-webkit-input-placeholder, :-moz-placeholder, ::-moz-placeholder, :-ms-
 .wordUser {
   display: none;
 }
+
+.active {
+  color:red;
+}
