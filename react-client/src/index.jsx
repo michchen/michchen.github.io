@@ -71,8 +71,11 @@ class App extends React.Component {
     socket.emit('addUser', myUser);
 
     socket.on('updateUserList', data => {
-      console.log("UPDATE USER LIST");
-      myHash = myHash || data.userList[data.curUserIndex[0]];
+      console.log("UPDATE USER LIST", myHash);
+      if (myHash === undefined) {
+        // debugger
+        myHash = data.userList[data.userList.length - 1][0];
+      }
       console.log(myHash);
       app.setState({
         users: data.userList,
@@ -101,12 +104,14 @@ class App extends React.Component {
 
       // input submit
       $('form').submit(function(){
-        console.log(app.state.curUserIndex);
+        console.log('SUBMIT');
         if (app.state.users.length <= 1) {
           alert('you are the only player. need 2+ to play');
           return false;
         // } else if (app.state.curUserIndex) {
         }
+        console.log(myHash);
+        console.log(app.state.curUserHash);
 
 
         // if it's not your turn

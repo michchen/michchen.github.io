@@ -98,7 +98,7 @@ io.on('connection', function(socket){
       socket.client.id, // unique id
       user              // user's name
     ]);
-    console.log(userList);
+    console.log(`curUserIndex: ${curUserIndex}`);
     curUserHash = userList[curUserIndex][0];
     io.sockets.emit(
       'updateUserList',
