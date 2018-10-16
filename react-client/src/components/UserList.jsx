@@ -7,7 +7,7 @@ const UserList = (props) => {
       <ul id="userList">
         {
           props.userList.map( (userData, i) => {
-            console.log(props.curUserIndex, i, props.curUserIndex === i);
+            // console.log(props.curUserIndex, i, props.curUserIndex === i);
             return (
               <li key={i} className={((props.curUserIndex === i) ? 'active' : '')}>
                 {userData[1]}

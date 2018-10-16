@@ -35,38 +35,6 @@ $(function () {
     // console.log(`${count} users`);
     numUsers = count;
   })
-
-  // input submit
-  $('form').submit(function(){
-    // if (numUsers <= 1) {
-    //   alert('you are the only player. need 2+ to play');
-    //   return false;
-    // }
-    const curText = validate($('#inputText').val());
-    if (curText) {
-      let myData = {
-        id: gameId,
-        user: curUser,
-        text: curText
-      };
-
-      $.ajax({
-        method: 'POST',
-        url: '/api/post',
-        contentType: 'application/json',
-        data: JSON.stringify(myData)
-      }).done(() => {
-        $('#inputText').val('');
-        console.log(`send message`);
-        socket.emit('chat message', {
-          user: myData.user,
-          text: myData.text
-        });
-      });
-    }
-    return false; // prevent page refesh
-  }); // end submit cb
-
 });
 
 
@@ -139,7 +107,43 @@ class App extends React.Component {
 
     // debugger
     this.getGame(this, gameId);
-  }
+
+
+      // input submit
+      $('form').submit(function(){
+        console.log(app.state.curUserIndex);
+        if (app.state.users.length <= 1) {
+          alert('you are the only player. need 2+ to play');
+          return false;
+        // } else if (app.state.curUserIndex) {
+
+        }
+        const curText = validate($('#inputText').val());
+        if (curText) {
+          let myData = {
+            id: gameId,
+            user: curUser,
+            text: curText
+          };
+
+          $.ajax({
+            method: 'POST',
+            url: '/api/post',
+            contentType: 'application/json',
+            data: JSON.stringify(myData)
+          }).done(() => {
+            $('#inputText').val('');
+            console.log(`send message`);
+            socket.emit('chat message', {
+              user: myData.user,
+              text: myData.text
+            });
+          });
+        }
+        return false; // prevent page refesh
+      }); // end submit cb
+
+  } // end componentdidmount
 
   render() {
     console.log(this.state);
