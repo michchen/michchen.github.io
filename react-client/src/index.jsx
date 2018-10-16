@@ -113,18 +113,10 @@ class App extends React.Component {
         console.log(myHash);
         console.log(app.state.curUserHash);
 
-
-        // if it's not your turn
-
-        // currently my state has moves, users, and curUserIndex
-        // console.log($('#userList li').eq(curUserIndex).text(), curUser)
-        // i would like the curUserHash as well
-        // else if () {
-        //   alert('not your turn');
-        //   return false;
-        // }
-
-
+        if (myHash !== app.state.curUserHash) {
+          alert('not your turn!');
+          return false;
+        }
 
         const curText = validate($('#inputText').val());
         if (curText) {
