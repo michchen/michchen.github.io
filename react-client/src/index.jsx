@@ -42,8 +42,8 @@ class App extends React.Component {
     super(props);
     this.state = {
       moves: [],
-      users: {},
-      curUser: null
+      users: [],
+      curUserIndex: null
     };
   }
 
@@ -80,13 +80,15 @@ class App extends React.Component {
       app.getGame(app, gameId);
     });
 
-    socket.on('userList', data => {
-      app.setState({users: data});
-    });
+    socket.on('userList', (data => {
+      console.log(data);
+      this.setState({
+        users: data.userList,
+        curUserIndex: data.curUserIndex
+      });
+      console.log(this.state);
+    }).bind(this));
 
-    socket.on('curUser', user => {
-      app.setState({curUser: user});
-    });
 
     // submit word callback
 
@@ -128,10 +130,12 @@ class App extends React.Component {
   }
 
   render() {
+    console.log("RE RENDER");
+    console.log(this.state.users);
     return (<div>
       <InputWord />
       <WordList movesList={this.state.moves}/>
-      <UserList userList={this.state.users} curUser={this.state.curUser}/>
+      <UserList userList={this.state.users} curUser={this.state.curUserIndex}/>
     </div>);
   }
 }
