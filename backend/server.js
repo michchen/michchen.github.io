@@ -13,6 +13,9 @@ let userOrder = {};
 let curUser;
 let curGame;
 
+let curUserIndex = 0;
+let userList = [];
+
 
 ///////////////////
 //   ENDPOINTS   //
@@ -49,38 +52,25 @@ io.on('connection', function(socket){
   console.log(curGame);
 
   socket.on('disconnect', function(){
-    // userOrder.splice(userOrder.indexOf(socketList[socket.client.id]), 1);
-    console.log('disconnect '+socketList[socket.client.id]);
-    delete socketList[socket.client.id];
-    // console.log(socketList);
-    delete userOrder[userOrder[curGame].indexOf(socketList[socket.client.id])];
-    console.log(Object.entries(socketList));
-    if (Object.entries(socketList).length <= 1) {
-      socketList = {};
-    }
+    // store index of current user as curUserIndex
+
+    // if curUserIndex is greater or equal to the index of current user
+      // do nothing, because splicing current user would essentially move curUserIndex to the next user
+    // else
+      // increment curUserIndex
+
     io.sockets.emit('userList', socketList);
   });
 
   socket.on('addUser', user => {
+    // if first user in room, no need to do anything bc curUserIndex is already 0
 
-    if (Object.entries(socketList).length === 0) {
-        curUser = user;
-    }
+    // pretty much just push user tuple to userList
 
-    socketList[socket.client.id] = user;
-    socketList.current = curUser;
-    // console.log('current user is ' + curUser);
+    
 
-    if (typeof userOrder[curGame] === 'object') {
-      userOrder[curGame].push(user);
-    } else {
-      userOrder[curGame] = [user]
-    }
-    console.log('addUser:');
-    console.log(userOrder);
-
-    io.sockets.emit('curUser', curUser);
-    io.sockets.emit('userList', socketList);
+    // io.sockets.emit('curUser', curUser);
+    // io.sockets.emit('userList', socketList);
   });
 
   socket.on('message', function(data){
