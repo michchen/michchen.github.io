@@ -26,7 +26,7 @@ const nextUser = () => {
 //  SOCKET.IO   //
 //////////////////
 
-let curUser = 'michelle';
+let curUser = 'player' + Math.round(Math.random() * 10000);
 var socket = io();
 
 $(function () {
@@ -106,10 +106,16 @@ class App extends React.Component {
   componentDidMount() {
     let app = this;
 
+    let enteredUserName = prompt('Please enter your name', curUser);
+    if (enteredUserName && enteredUserName.trim().length > 0) {
+      curUser = enteredUserName;
+    }
+
     socket.emit('addUser', curUser);
 
     socket.on('updateUserList', data => {
       console.log("UPDATE USER LIST");
+      console.log(data.userList);
       app.setState({
         users: data.userList,
         curUserIndex: data.curUserIndex

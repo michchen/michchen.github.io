@@ -47,7 +47,6 @@ io.on('connection', function(socket){
   console.log(`a user connected!`);
 
   socket.on('disconnect', function(){
-    io.sockets.emit('updateUserList', userList);
     console.log(`a user disconnected.`);
     console.log(userList);
 
@@ -61,11 +60,10 @@ io.on('connection', function(socket){
         curUserIndex++;
       }
       userList.splice(disconnectingIndex, 1);
-      socket.emit('updateUserList', userList);
+      socket.emit('updateUserList', {userList: userList, curUserIndex: curUserIndex});
     }
 
   });
-
 
   socket.on('addUser', user => {
     console.log('server.js > on.addUser');
@@ -74,10 +72,7 @@ io.on('connection', function(socket){
       user              // user's name
     ]);
     console.log(userList);
-    // oct 15
-    let obj = {userList: userList, curUserIndex: curUserIndex};
-    // console.log(obj);
-    socket.emit('updateUserList', obj);
+    socket.emit('updateUserList', {userList: userList, curUserIndex: curUserIndex});
   });
 
   socket.on('chat message', function(data){
