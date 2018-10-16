@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import $ from 'jquery';
 import InputWord from './components/InputWord.jsx';
 import WordList from './components/WordList.jsx';
+import UserList from './components/UserList.jsx';
 
 let numUsers = 0;
 let userList = [];
@@ -25,8 +26,10 @@ const nextUser = () => {
 //  SOCKET.IO   //
 //////////////////
 
-let curUser = 'michelle';
 var socket = io();
+
+
+
 
 $(function () {
 
@@ -37,10 +40,10 @@ $(function () {
 
   // input submit
   $('form').submit(function(){
-    if (numUsers <= 1) {
-      alert('you are the only player. need 2+ to play');
-      return false;
-    }
+    // if (numUsers <= 1) {
+      // alert('you are the only player. need 2+ to play');
+      // return false;
+    // }
     const curText = validate($('#inputText').val());
     if (curText) {
       let myData = {
@@ -79,7 +82,9 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      moves: []
+      moves: [],
+      users: [],
+      curUserIndex: 0
     };
   }
 
@@ -103,10 +108,38 @@ class App extends React.Component {
   }
 
   componentDidMount() {
+    let enteredUserName = prompt('Please enter your name', curUser);
+    if (enteredUserName && enteredUserName.trim().length > 0) {
+      curUser = enteredUserName;
+    }
+
+    // working
+    socket.emit('addUser', curUser);
+
     let app = this;
+
+
+    // could i merge server-message and server-nextUser??
+    // they are both emmitted on "chat message"
+
     socket.on('server-message', msg => {
       console.log('get message ' + msg.text);
+      // app.getGame(app, gameId);
+    });
+
+    socket.on('server-nextUser', data => {
+      app.setState({
+        curUserIndex: data
+      });
       app.getGame(app, gameId);
+    });
+
+    socket.on('updateUserList', data => {
+      console.log('updateUserList');
+      app.setState({
+        users: data.userList,
+        curUserIndex: data.curUserIndex
+      });
     });
 
     // debugger
@@ -115,8 +148,9 @@ class App extends React.Component {
 
   render() {
     return (<div>
-      <WordList movesList={this.state.moves}/>
       <InputWord />
+      <WordList movesList={this.state.moves}/>
+      <UserList userList={this.state.users} curUserIndex={this.state.curUserIndex}/>
     </div>);
   }
 }
