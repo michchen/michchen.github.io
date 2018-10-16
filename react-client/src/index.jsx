@@ -7,6 +7,7 @@ import UserList from './components/UserList.jsx';
 
 let numUsers = 0;
 let curUser = `player${Math.round(Math.random() * 10000)}`;
+// let curUid;
 
 const gameId = document.location.pathname.replace(/\//g,'');
 
@@ -18,8 +19,11 @@ const validate = text => {
   }
 }
 
-const nextUser = () => {
-
+const nextTurn = () => {
+  let active = $('#userList .active');
+  $('#userList .active').removeClass('active');
+  active.next().addClass('active');
+  console.log(`current player is now ${active.text()}`);
 }
 
 //////////////////
@@ -44,7 +48,7 @@ class App extends React.Component {
   }
 
   getGame(app, gameId) {
-    console.log(`fn getGame(${gameId})`);
+    // console.log(`fn getGame(${gameId})`);
     $.ajax({
       url: '/api/get',
       data: {
@@ -72,6 +76,7 @@ class App extends React.Component {
     let app = this;
     socket.on('server-message', msg => {
       console.log('get message ' + msg.text);
+      nextTurn();
       app.getGame(app, gameId);
     });
 
@@ -80,7 +85,7 @@ class App extends React.Component {
     });
 
     socket.on('curUser', user => {
-      app.setState({curUser: user})
+      app.setState({curUser: user});
     });
 
     // submit word callback
