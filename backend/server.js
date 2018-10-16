@@ -42,11 +42,12 @@ app.get('/api/get', (req, res) => {
 // HELPER FUNCTIONS //
 
 const nextTurn = () => {
-  if (curUserIndex < (userList.length - 1)) {
-    curUserIndex = curUserIndex + 1;
-  } else {
+  // console.log(curUserIndex);
+  curUserIndex++;
+  if (curUserIndex >= userList.length) {
     curUserIndex = 0;
   }
+  // console.log(curUserIndex);
 }
 
 
@@ -98,6 +99,8 @@ io.on('connection', function(socket){
     console.log(`emit server-message "${data.text}" on server`);
     nextTurn();
     io.sockets.emit('server-message', data);
+    console.log(curUserIndex);
+    
     io.sockets.emit('server-nextUser', curUserIndex);
   });
 

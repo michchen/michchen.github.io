@@ -131,6 +131,9 @@ class App extends React.Component {
 
     socket.on('server-nextUser', data => {
       console.log(`server-nextUser: ${data}`);
+      app.setState({
+        curUserIndex: data
+      })
     });
 
 

@@ -37,6 +37,12 @@ input, ::-webkit-input-placeholder, :-moz-placeholder, ::-moz-placeholder, :-ms-
  text-align: center;
 }
 
+/* active user */
+.active {
+  color:red;
+}
+
+
 #wordList {
   /* background-color: #ddf; */
   text-align: center;
