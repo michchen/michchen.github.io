@@ -26,6 +26,10 @@ form input {
   /* font-size:  */
 }
 
+input.disabled {
+  background-color: #777;
+}
+
 #app > div {
   display: flex;
   align-items: center;
@@ -38,9 +42,11 @@ input, ::-webkit-input-placeholder, :-moz-placeholder, ::-moz-placeholder, :-ms-
 }
 
 /* active user */
-.active {
+#userList .active {
   color:red;
 }
+
+
 
 
 #wordList {

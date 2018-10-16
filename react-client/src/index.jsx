@@ -150,7 +150,7 @@ class App extends React.Component {
     return (<div>
       <WordList movesList={this.state.moves}/>
       <UserList userList={this.state.users} curUserHash={this.state.curUserHash}/>
-      <InputWord />
+      <InputWord isEnabled={myHash==this.state.curUserHash}/>
     </div>);
   }
 }
