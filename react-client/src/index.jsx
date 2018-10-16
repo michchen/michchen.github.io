@@ -42,7 +42,7 @@ class App extends React.Component {
   }
 
   getGame(app, gameId) {
-    console.log(`fn getGame(${gameId})`);
+    // console.log(`fn getGame(${gameId})`);
     $.ajax({
       url: '/api/get',
       data: {
@@ -71,12 +71,12 @@ class App extends React.Component {
     socket.emit('addUser', myUser);
 
     socket.on('updateUserList', data => {
-      console.log("UPDATE USER LIST", myHash);
+      // console.log("UPDATE USER LIST", myHash);
       if (myHash === undefined) {
         // debugger
         myHash = data.userList[data.userList.length - 1][0];
       }
-      console.log(myHash);
+      // console.log(myHash);
       app.setState({
         users: data.userList,
         curUserIndex: data.curUserIndex,
@@ -85,12 +85,12 @@ class App extends React.Component {
     });
 
     socket.on('server-message', msg => {
-      console.log('get message ' + msg.text);
+      // console.log('get message ' + msg.text);
       app.getGame(app, gameId);
     });
 
     socket.on('server-nextUser', data => {
-      console.log(`server-nextUser: ${data}`);
+      // console.log(`server-nextUser: ${data}`);
       app.setState({
         curUserIndex: data.curUserIndex,
         curUserHash: data.curUserHash
@@ -104,14 +104,14 @@ class App extends React.Component {
 
       // input submit
       $('form').submit(function(){
-        console.log('SUBMIT');
+        // console.log('SUBMIT');
         if (app.state.users.length <= 1) {
           alert('you are the only player. need 2+ to play');
           return false;
         // } else if (app.state.curUserIndex) {
         }
-        console.log(myHash);
-        console.log(app.state.curUserHash);
+        // console.log(myHash);
+        // console.log(app.state.curUserHash);
 
         if (myHash !== app.state.curUserHash) {
           alert('not your turn!');
@@ -133,7 +133,7 @@ class App extends React.Component {
             data: JSON.stringify(myData)
           }).done(() => {
             $('#inputText').val('');
-            console.log(`send message`);
+            // console.log(`send message`);
             socket.emit('chat message', {
               user: myData.user,
               text: myData.text
@@ -146,7 +146,7 @@ class App extends React.Component {
   } // end componentdidmount
 
   render() {
-    console.log(this.state);
+    // console.log(this.state);
     return (<div>
       <WordList movesList={this.state.moves}/>
       <UserList userList={this.state.users} curUserHash={this.state.curUserHash}/>

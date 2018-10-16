@@ -43,14 +43,14 @@ app.get('/api/get', (req, res) => {
 // HELPER FUNCTIONS //
 
 const nextTurn = () => {
-  console.log('NEXT TURN');
+  // console.log('NEXT TURN');
   let temp = curUserIndex
   curUserIndex++;
   if (curUserIndex >= userList.length) {
     curUserIndex = 0;
   }
-  console.log(userList);
-  console.log(`user index changes from ${temp} --> ${curUserIndex}`);
+  // console.log(userList);
+  // console.log(`user index changes from ${temp} --> ${curUserIndex}`);
   if (userList[curUserIndex]) {
     curUserHash = userList[curUserIndex][0];
   }
@@ -62,12 +62,11 @@ const nextTurn = () => {
 ////////////////
 
 io.on('connection', function(socket){
-  console.log(`a user connected!`);
-  // console.log(userList);
+  // console.log(`a user connected!`);
 
   socket.on('disconnect', function(){
-    console.log(`a user disconnected.`);
-    console.log(userList);
+    // console.log(`a user disconnected.`);
+    // console.log(userList);
 
     let disconnectingIndex = userList.findIndex(
       tuple => (tuple[0] === socket.client.id)
@@ -93,12 +92,12 @@ io.on('connection', function(socket){
   });
 
   socket.on('addUser', user => {
-    console.log('server.js > on.addUser');
+    // console.log('server.js > on.addUser');
     userList.push([
       socket.client.id, // unique id
       user              // user's name
     ]);
-    console.log(`curUserIndex: ${curUserIndex}`);
+    // console.log(`curUserIndex: ${curUserIndex}`);
     curUserHash = userList[curUserIndex][0];
     io.sockets.emit(
       'updateUserList',
@@ -107,11 +106,11 @@ io.on('connection', function(socket){
   });
 
   socket.on('chat message', function(data){
-    console.log(`received chat-message "${data.text}" on server`);
-    console.log(`emit server-message "${data.text}" on server`);
+    // console.log(`received chat-message "${data.text}" on server`);
+    // console.log(`emit server-message "${data.text}" on server`);
     nextTurn();
     io.sockets.emit('server-message', data);
-    console.log(curUserIndex);
+    // console.log(curUserIndex);
 
     io.sockets.emit('server-nextUser', {curUserIndex: curUserIndex, curUserHash: curUserHash});
   });
