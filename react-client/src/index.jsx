@@ -9,7 +9,7 @@ let userList = [];
 let myUser = 'player' + Math.round(Math.random() * 10000);
 let myHash;
 
-const gameId = document.location.pathname.replace(/\//g,'');
+// const gameId = document.location.pathname.replace(/\//g,'');
 
 const validate = text => {
   if (text.trim().length > 0) {
@@ -37,12 +37,17 @@ class App extends React.Component {
       moves: [],
       users: [],
       curUserIndex: 0,
-      curUserHash: ''
+      curUserHash: '',
+      curText: '',
+      gameId: '',
     };
+
+    this.handleSubmitInput = this.handleSubmitInput.bind(this);
+    this.handleInputChange = this.handleInputChange.bind(this);
   }
 
-  getGame(app, gameId) {
-    // console.log(`fn getGame(${gameId})`);
+  getGame() {
+    const { gameId } = this.state;
     $.ajax({
       url: '/api/get',
       data: {
@@ -50,7 +55,8 @@ class App extends React.Component {
       },
       method: 'GET',
       success: data => {
-        app.setState({
+        console.log("get game successful!", data)
+        this.setState({
           moves: data.moves || []
         });
       },
@@ -60,8 +66,55 @@ class App extends React.Component {
     });
   }
 
+  handleInputChange(e){
+    this.setState({
+      curText: e.target.value
+    })
+  }
+
+  // brandon's react attempt for input submit
+  handleSubmitInput(e){
+    const { users, curUserHash, curText, gameId } = this.state
+    if (e.key === 'Enter') {
+      if (users.length <= 1) {
+        alert('you are the only player. need 2+ to play');
+        return false;
+      }
+      if (myHash !== curUserHash) {
+        alert('not your turn!');
+        return false;
+      }
+      let validatedCurText = validate(curText);
+      if (validatedCurText) {
+        let myData = {
+          id: gameId,
+          user: myUser,
+          text: validatedCurText
+        };
+        $.ajax({
+          method: 'POST',
+          url: '/api/post',
+          contentType: 'application/json',
+          data: JSON.stringify(myData)
+        }).done(() => {
+          $('#inputText').val('');
+          // console.log(`send message`);
+          socket.emit('chat message', {
+            user: myData.user,
+            text: myData.text
+          });
+        });
+      }
+    
+    
+    }
+  }      
+
   componentDidMount() {
+    
+    const gameId = window.location.pathname.replace(/\//g,'');
     let app = this;
+    this.setState({ gameId: gameId }, () => this.getGame());
 
     let enteredUserName = prompt('Please enter your name', myUser);
     if (enteredUserName && enteredUserName.trim().length > 0) {
@@ -97,61 +150,21 @@ class App extends React.Component {
       })
     });
 
-
-    // debugger
-    this.getGame(this, gameId);
-
-
-      // input submit
-      $('form').submit(function(){
-        // console.log('SUBMIT');
-        if (app.state.users.length <= 1) {
-          alert('you are the only player. need 2+ to play');
-          return false;
-        // } else if (app.state.curUserIndex) {
-        }
-        // console.log(myHash);
-        // console.log(app.state.curUserHash);
-
-        if (myHash !== app.state.curUserHash) {
-          alert('not your turn!');
-          return false;
-        }
-
-        const curText = validate($('#inputText').val());
-        if (curText) {
-          let myData = {
-            id: gameId,
-            user: myUser,
-            text: curText
-          };
-
-          $.ajax({
-            method: 'POST',
-            url: '/api/post',
-            contentType: 'application/json',
-            data: JSON.stringify(myData)
-          }).done(() => {
-            $('#inputText').val('');
-            // console.log(`send message`);
-            socket.emit('chat message', {
-              user: myData.user,
-              text: myData.text
-            });
-          });
-        }
-        return false; // prevent page refesh
-      }); // end submit cb
-
   } // end componentdidmount
 
   render() {
     // console.log(this.state);
-    return (<div>
-      <WordList movesList={this.state.moves}/>
-      <UserList userList={this.state.users} curUserHash={this.state.curUserHash}/>
-      <InputWord isEnabled={myHash==this.state.curUserHash}/>
-    </div>);
+    return (
+      <div>
+        <WordList movesList={this.state.moves}/>
+        <UserList userList={this.state.users} curUserHash={this.state.curUserHash}/>
+        <InputWord 
+          handleInputChange={this.handleInputChange} 
+          handleSubmitInput={this.handleSubmitInput} 
+          isEnabled={myHash==this.state.curUserHash}
+        />
+      </div>
+    );
   }
 }
 

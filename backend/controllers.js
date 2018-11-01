@@ -6,7 +6,7 @@ module.exports.insertWord = (data, callback) => {
   // console.log(data);
 
   db.collections.games.update(
-    { _id: Number(data.id) },
+    { _id: data.id },
     { $push: {
       moves: {
         user: data.user,
@@ -21,7 +21,7 @@ module.exports.insertWord = (data, callback) => {
 };
 
 module.exports.getWords = (data, callback) => {
-  db.collections.games.find({_id: Number(data.id)}).toArray((err, data) => {
+  db.collections.games.find({_id: data.id}).toArray((err, data) => {
     callback(data[0]);
   });
 };

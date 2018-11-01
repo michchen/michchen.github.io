@@ -35,6 +35,7 @@ app.post('/api/post', bodyParser.json() , (req, res) => {
 });
 
 app.get('/api/get', (req, res) => {
+  console.log('req body from get', req.query);
   ctrl.getWords(req.query, data => {
     res.send(data)
   });
