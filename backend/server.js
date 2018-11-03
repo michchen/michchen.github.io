@@ -9,17 +9,13 @@ const PORT = process.env.PORT;
 
 var router = express.Router();
 
-
-let curGame;
-let curUserIndex = 0;
-let userList = [];
-let curUserHash = '';
-
 ///////////////////
 //   ENDPOINTS   //
 ///////////////////
 
-app.use(bodyParser.json());
+// app.use(bodyParser.json());
+
+app.use(bodyParser.urlencoded({ extended: false }))
 
 app.use('/:id', express.static(__dirname + '/../react-client/dist'));
 
@@ -28,24 +24,40 @@ app.get('/', (req, res) => {
   res.send('main page');
 });
 
-app.post('/api/post', bodyParser.json() , (req, res) => {
-  ctrl.insertWord(req.body, data => {
-    res.send(data);
-  });
+app.post('/api/end', (req, res) => {
+  const { gameId } = req.body;
+  console.log('data from the api route', req.body)
+  ctrl.postGame(req.body, () => {
+    io.sockets.in(gameId).emit("endGame");
+    res.end()}
+  )
+  // ctrl.insertWord(req.body, data => {
+  //   res.send(data);
+  // });
 });
 
-app.get('/api/get', (req, res) => {
-  console.log('req body from get', req.query);
-  ctrl.getWords(req.query, data => {
-    res.send(data)
-  });
-});
+// DEPRECIATED LOL //
+
+// app.post('/api/post', bodyParser.json() , (req, res) => {
+//   ctrl.insertWord(req.body, data => {
+//     res.send(data);
+//   });
+// });
+
+// app.get('/api/get', (req, res) => {
+//   console.log('req body from get', req.query);
+//   ctrl.getWords(req.query, data => {
+//     res.send(data)
+//   });
+// });
+
+
 
 // HELPER FUNCTIONS //
 
 const nextTurn = () => {
   // console.log('NEXT TURN');
-  let temp = curUserIndex
+  // let temp = curUserIndex
   curUserIndex++;
   if (curUserIndex >= userList.length) {
     curUserIndex = 0;
@@ -57,65 +69,93 @@ const nextTurn = () => {
   }
 }
 
+//////////////////////
+//   LOCALSTORAGE   //
+//////////////////////
+
+// let curGame;
+// let curUserIndex = 0;
+let currentRoomsAndUsers = {};
+let currentUsers = {};
+// let curGamesHash = {};
 
 ////////////////
 //   SERVER   //
 ////////////////
 
 io.on('connection', function(socket){
-  // console.log(`a user connected!`);
+  
+  // handles addUser
+  socket.on('addUser', data => {
+    const { myUser, gameId } = data;
+    
+    // puts connected socket in that room 
+    socket.join(gameId);
 
-  socket.on('disconnect', function(){
-    // console.log(`a user disconnected.`);
-    // console.log(userList);
-
-    let disconnectingIndex = userList.findIndex(
-      tuple => (tuple[0] === socket.client.id)
-    );
-
-    if (disconnectingIndex >= 0) {
-      if (curUserIndex < disconnectingIndex) {
-        curUserIndex++;
+    // stores player locally
+    if (!currentRoomsAndUsers[gameId]){
+      currentRoomsAndUsers[gameId] = {
+        players: [[socket.client.id, myUser]]
       }
-
-      if (curUserIndex === disconnectingIndex) {
-        nextTurn();
-      }
-
-      userList.splice(disconnectingIndex, 1);
-
-      io.sockets.emit(
-        'updateUserList',
-        {userList: userList, curUserIndex: curUserIndex, curUserHash: curUserHash}
-      );
+    } else {
+      currentRoomsAndUsers[gameId].players.push([socket.client.id, myUser])
     }
 
+    currentUsers[socket.client.id] = gameId;
+
+    // emit update user to all users connected in the room
+    io.sockets.in(gameId).emit('updateUserList', currentRoomsAndUsers[gameId].players);
   });
 
-  socket.on('addUser', user => {
-    // console.log('server.js > on.addUser');
-    userList.push([
-      socket.client.id, // unique id
-      user              // user's name
-    ]);
-    // console.log(`curUserIndex: ${curUserIndex}`);
-    curUserHash = userList[curUserIndex][0];
-    io.sockets.emit(
-      'updateUserList',
-      {userList: userList, curUserIndex: curUserIndex, curUserHash: curUserHash}
-    );
-  });
+  // handles start game
+  socket.on('initGame', gameId => {
+    let randomPlayerIndex = Math.floor(Math.random() * currentRoomsAndUsers[gameId].players.length);
+    currentRoomsAndUsers[gameId].currentPlayerTurn = currentRoomsAndUsers[gameId].players[randomPlayerIndex][0]
+    currentRoomsAndUsers[gameId].currentPlayerIndex = randomPlayerIndex;
+    io.sockets.in(gameId).emit("startGame", currentRoomsAndUsers[gameId].currentPlayerTurn);
+  })
+  
+  // handles when someone makes a move
+  socket.on('sendTurn', data => {
+    const { gameId, validatedCurText } = data;
+    let { currentPlayerIndex, players, currentPlayerTurn } = currentRoomsAndUsers[gameId];
+    currentPlayerIndex = currentPlayerIndex + 1;
+    if (currentPlayerIndex >= players.length) {
+      currentPlayerIndex = 0;
+    }
+    currentPlayerTurn = players[currentPlayerIndex][0]//00;
+    currentRoomsAndUsers[gameId].currentPlayerIndex = currentPlayerIndex;
+    currentRoomsAndUsers[gameId].currentPlayerTurn = currentPlayerTurn;
+    io.sockets.in(gameId).emit('updateCurrentGame', 
+      {
+        moveAdded : validatedCurText, 
+        currentGame : currentRoomsAndUsers[gameId] 
+      });
+  })
 
-  socket.on('chat message', function(data){
-    // console.log(`received chat-message "${data.text}" on server`);
-    // console.log(`emit server-message "${data.text}" on server`);
-    nextTurn();
-    io.sockets.emit('server-message', data);
-    // console.log(curUserIndex);
+  socket.on('disconnect', () => {
+    console.log(`a user disconnected.`, socket.client.id);
+    console.log('all users', currentUsers);
+    let roomOfDisconnectedPlayer = currentUsers[socket.client.id]
+    console.log('room of disconnected user', roomOfDisconnectedPlayer);
+    if (roomOfDisconnectedPlayer){
+      for (let i = 0; i < currentRoomsAndUsers[roomOfDisconnectedPlayer].players.length; i++){
+          if (currentRoomsAndUsers[roomOfDisconnectedPlayer].players[i][0] === socket.client.id){
+            currentRoomsAndUsers[roomOfDisconnectedPlayer].players.splice(i, 1);
+          }
+      }
+    }
 
-    io.sockets.emit('server-nextUser', {curUserIndex: curUserIndex, curUserHash: curUserHash});
-  });
-
+    delete currentUsers[socket.client.id]
+    console.log('USERS AFTER DISCONNECT', currentRoomsAndUsers[roomOfDisconnectedPlayer])
+    // console.log('USERS AFTER DISCONNECT', currentUsers)
+    io.sockets.in(roomOfDisconnectedPlayer).emit('endGame', 'disconnected'); 
+    if (currentRoomsAndUsers[roomOfDisconnectedPlayer]){
+      io.sockets.in(roomOfDisconnectedPlayer).emit('updateUserList', currentRoomsAndUsers[roomOfDisconnectedPlayer].players);
+    } else {
+      delete currentRoomsAndUsers[roomOfDisconnectedPlayer]
+    }
+  })
 });
 
 http.listen(PORT, function() {

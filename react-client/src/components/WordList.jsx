@@ -1,14 +1,16 @@
 import React from 'react';
 import Word from './Word.jsx';
 
-const WordList = (props) => (
-  <div>
-    <div id="wordList">
-      {props.movesList.map(item => (
-        <Word moveData={item} />
-      ))}
+const WordList = (props) => {
+  return(
+    <div>
+      <div id="wordList">
+        {props.movesList.map((item, index) => (
+          <Word key={index} moveData={item} />
+        ))}
+      </div>
     </div>
-  </div>
-);
+  )
+}
 
 export default WordList;

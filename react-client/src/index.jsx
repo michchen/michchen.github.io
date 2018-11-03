@@ -5,12 +5,6 @@ import InputWord from './components/InputWord.jsx';
 import WordList from './components/WordList.jsx';
 import UserList from './components/UserList.jsx';
 
-let userList = [];
-let myUser = 'player' + Math.round(Math.random() * 10000);
-let myHash;
-
-// const gameId = document.location.pathname.replace(/\//g,'');
-
 const validate = text => {
   if (text.trim().length > 0) {
     return text.trim();
@@ -37,33 +31,38 @@ class App extends React.Component {
       moves: [],
       users: [],
       curUserIndex: 0,
-      curUserHash: '',
+      curUserHash: null,
       curText: '',
-      gameId: '',
+      gameId: null,
+      myUser: null,
+      myHash: null
     };
 
     this.handleSubmitInput = this.handleSubmitInput.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
+    this.handleStartGame = this.handleStartGame.bind(this);
+    this.handleEndGame = this.handleEndGame.bind(this);
   }
 
   getGame() {
-    const { gameId } = this.state;
-    $.ajax({
-      url: '/api/get',
-      data: {
-        id: gameId
-      },
-      method: 'GET',
-      success: data => {
-        console.log("get game successful!", data)
-        this.setState({
-          moves: data.moves || []
-        });
-      },
-      error: (err) => {
-        console.log('err', err);
-      }
-    });
+    // const { gameId } = this.state;
+    // $.ajax({
+    //   url: '/api/get',
+    //   data: {
+    //     id: gameId
+    //   },
+    //   method: 'GET',
+    //   success: data => {
+    //     console.log("get game successful!", data)
+    //     this.setState({
+    //       moves: data.moves || []
+    //     });
+    //   },
+    //   error: (err) => {
+    //     console.log('err', err);
+    //   }
+    // });
+
   }
 
   handleInputChange(e){
@@ -74,7 +73,7 @@ class App extends React.Component {
 
   // brandon's react attempt for input submit
   handleSubmitInput(e){
-    const { users, curUserHash, curText, gameId } = this.state
+    const { users, curUserHash, curText, gameId, myHash, myUser } = this.state
     if (e.key === 'Enter') {
       if (users.length <= 1) {
         alert('you are the only player. need 2+ to play');
@@ -85,84 +84,127 @@ class App extends React.Component {
         return false;
       }
       let validatedCurText = validate(curText);
-      if (validatedCurText) {
-        let myData = {
-          id: gameId,
-          user: myUser,
-          text: validatedCurText
-        };
-        $.ajax({
-          method: 'POST',
-          url: '/api/post',
-          contentType: 'application/json',
-          data: JSON.stringify(myData)
-        }).done(() => {
-          $('#inputText').val('');
-          // console.log(`send message`);
-          socket.emit('chat message', {
-            user: myData.user,
-            text: myData.text
-          });
-        });
-      }
-    
-    
+      socket.emit('sendTurn', {validatedCurText, gameId});
     }
   }      
 
+  handleStartGame(){
+    const { gameId } = this.state;
+    socket.emit('initGame', gameId)
+  }
+  
+  handleEndGame(){
+    const {gameId, moves} = this.state;
+    console.log("were about to end the game lol", gameId, moves);
+    $.ajax({
+      method: 'POST',
+      url: '/api/end',
+      data: {
+        gameId,
+        moves
+      },
+      success: data => {
+        console.log(`Game Over! You've created: ${this.state.moves}`);
+      },
+      error: (err) => {
+        console.log('err', err);
+      }
+    });
+  }
   componentDidMount() {
     
+    // gets gameID from window and sets it to state 
     const gameId = window.location.pathname.replace(/\//g,'');
-    let app = this;
     this.setState({ gameId: gameId }, () => this.getGame());
-
+    
+    // Add User to Socket 
+    let myUser = 'player' + Math.round(Math.random() * 10000);
     let enteredUserName = prompt('Please enter your name', myUser);
     if (enteredUserName && enteredUserName.trim().length > 0) {
-      myUser = enteredUserName;
+      this.setState({ myUser: enteredUserName },
+         () => 
+          {
+            const { myUser, gameId } = this.state
+            socket.emit('addUser', {myUser: myUser, gameId: gameId})
+         }
+      );
+    } else {
+      // if player choosen an invalid name, give the random myUser name
+      this.setState({ myUser: myUser }, 
+        () => {
+          socket.emit('addUser', {myUser: myUser, gameId: this.state.gameId})
+        });
     }
 
-    socket.emit('addUser', myUser);
-
+    // Listens for Updated User List (every time a user joins)
     socket.on('updateUserList', data => {
-      // console.log("UPDATE USER LIST", myHash);
-      if (myHash === undefined) {
-        // debugger
-        myHash = data.userList[data.userList.length - 1][0];
+      const { myHash, gameId } = this.state;
+      let myUserHash = data[data.length - 1][0];
+      if (!myHash) {
+        this.setState({ myHash : myUserHash }) 
       }
-      // console.log(myHash);
-      app.setState({
-        users: data.userList,
-        curUserIndex: data.curUserIndex,
-        curUserHash: data.curUserHash
+      this.setState({
+        users: data,
+        // curUserIndex: data.curUserIndex,
+        // curUserHash: data.curUserHash
       });
     });
 
-    socket.on('server-message', msg => {
-      // console.log('get message ' + msg.text);
-      app.getGame(app, gameId);
+    // listens for if anyone started the game!
+    socket.on("startGame", currentPlayerTurnHash => {
+      this.setState({curUserHash: currentPlayerTurnHash})
+    })
+
+    socket.on('updateCurrentGame', data => {
+      const { currentGame, moveAdded } = data;
+      const { curUserHash } = this.state;
+      let currentMoves = this.state.moves;
+      currentMoves.push(moveAdded);
+      this.setState(
+        {
+          moves: currentMoves,
+          curUserHash: currentGame.currentPlayerTurn
+        }, 
+      () => console.log('updated moves', this.state));
     });
 
-    socket.on('server-nextUser', data => {
-      // console.log(`server-nextUser: ${data}`);
-      app.setState({
-        curUserIndex: data.curUserIndex,
-        curUserHash: data.curUserHash
-      })
+    socket.on('endGame', (disconnected) => {
+      if (disconnected) {
+        alert(`a player has disconnected! The game is over, you made ${this.state.moves.join(' ')}`)
+      } else {
+        alert(`The game is over! You made: ${this.state.moves.join(' ')}`);
+      }
+      this.setState({moves: []});
     });
+    // socket.on('server-message', msg => {
+    //   // console.log('get message ' + msg.text);
+    //   this.getGame();
+    // });
+
+    // socket.on('server-nextUser', data => {
+    //   // console.log(`server-nextUser: ${data}`);
+    //   this.setState({
+    //     curUserIndex: data.curUserIndex,
+    //     curUserHash: data.curUserHash
+    //   })
+    // });
 
   } // end componentdidmount
 
   render() {
     // console.log(this.state);
+    const { myHash, moves, users, curUserHash } = this.state;
     return (
       <div>
-        <WordList movesList={this.state.moves}/>
-        <UserList userList={this.state.users} curUserHash={this.state.curUserHash}/>
+        <WordList movesList={moves}/>
+        <UserList userList={users} curUserHash={curUserHash}/>
         <InputWord 
           handleInputChange={this.handleInputChange} 
           handleSubmitInput={this.handleSubmitInput} 
-          isEnabled={myHash==this.state.curUserHash}
+          isEnabled={myHash==curUserHash}
         />
+        <button type="button" onClick={this.handleStartGame}>Start</button>
+        <button type="button" onClick={this.handleEndGame}>End</button>
       </div>
     );
   }

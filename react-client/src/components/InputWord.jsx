@@ -7,7 +7,7 @@ const InputWord = (props) => {
     <div>
       <input type="text" 
         autoComplete="off" 
-        placeholder="type a word & press enter to submit" 
+        placeholder={"type a word & press enter to submit"} 
         onKeyPress={props.handleSubmitInput}
         onChange={(e) => props.handleInputChange(e)}
         className={props.isEnabled === true ? '' : 'disabled'}
