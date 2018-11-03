@@ -134,10 +134,12 @@ io.on('connection', function(socket){
   })
 
   socket.on('disconnect', () => {
-    console.log(`a user disconnected.`, socket.client.id);
-    console.log('all users', currentUsers);
+
+    // finds the room of disconnected player
     let roomOfDisconnectedPlayer = currentUsers[socket.client.id]
     console.log('room of disconnected user', roomOfDisconnectedPlayer);
+
+    // go to the room in memory, and splice out the player 
     if (roomOfDisconnectedPlayer){
       for (let i = 0; i < currentRoomsAndUsers[roomOfDisconnectedPlayer].players.length; i++){
           if (currentRoomsAndUsers[roomOfDisconnectedPlayer].players[i][0] === socket.client.id){
@@ -146,13 +148,18 @@ io.on('connection', function(socket){
       }
     }
 
+    // delete current user from list of users playing right now
     delete currentUsers[socket.client.id]
-    console.log('USERS AFTER DISCONNECT', currentRoomsAndUsers[roomOfDisconnectedPlayer])
-    // console.log('USERS AFTER DISCONNECT', currentUsers)
+
+    // end game if the player was in a game
     io.sockets.in(roomOfDisconnectedPlayer).emit('endGame', 'disconnected'); 
+    
+    // updates userslist if players are still in the room after disconnect
     if (currentRoomsAndUsers[roomOfDisconnectedPlayer]){
       io.sockets.in(roomOfDisconnectedPlayer).emit('updateUserList', currentRoomsAndUsers[roomOfDisconnectedPlayer].players);
-    } else {
+    } 
+    // deletes room from memory if there are no players remaining in the game
+    else {
       delete currentRoomsAndUsers[roomOfDisconnectedPlayer]
     }
   })

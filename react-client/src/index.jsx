@@ -4,6 +4,7 @@ import $ from 'jquery';
 import InputWord from './components/InputWord.jsx';
 import WordList from './components/WordList.jsx';
 import UserList from './components/UserList.jsx';
+import Timer from './components/Timer.jsx';
 
 const validate = text => {
   if (text.trim().length > 0) {
@@ -35,34 +36,14 @@ class App extends React.Component {
       curText: '',
       gameId: null,
       myUser: null,
-      myHash: null
+      myHash: null,
+      inGame: false
     };
 
     this.handleSubmitInput = this.handleSubmitInput.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleStartGame = this.handleStartGame.bind(this);
     this.handleEndGame = this.handleEndGame.bind(this);
-  }
-
-  getGame() {
-    // const { gameId } = this.state;
-    // $.ajax({
-    //   url: '/api/get',
-    //   data: {
-    //     id: gameId
-    //   },
-    //   method: 'GET',
-    //   success: data => {
-    //     console.log("get game successful!", data)
-    //     this.setState({
-    //       moves: data.moves || []
-    //     });
-    //   },
-    //   error: (err) => {
-    //     console.log('err', err);
-    //   }
-    // });
-
   }
 
   handleInputChange(e){
@@ -89,8 +70,12 @@ class App extends React.Component {
   }      
 
   handleStartGame(){
-    const { gameId } = this.state;
-    socket.emit('initGame', gameId)
+    if (this.state.users.length < 2){
+      alert("you need two players to start!")
+    } else {
+      const { gameId } = this.state;
+      socket.emit('initGame', gameId)
+    }
   }
   
   handleEndGame(){
@@ -115,7 +100,7 @@ class App extends React.Component {
     
     // gets gameID from window and sets it to state 
     const gameId = window.location.pathname.replace(/\//g,'');
-    this.setState({ gameId: gameId }, () => this.getGame());
+    this.setState({ gameId: gameId });
     
     // Add User to Socket 
     let myUser = 'player' + Math.round(Math.random() * 10000);
@@ -145,14 +130,15 @@ class App extends React.Component {
       }
       this.setState({
         users: data,
-        // curUserIndex: data.curUserIndex,
-        // curUserHash: data.curUserHash
       });
     });
 
     // listens for if anyone started the game!
     socket.on("startGame", currentPlayerTurnHash => {
-      this.setState({curUserHash: currentPlayerTurnHash})
+      this.setState({
+        curUserHash: currentPlayerTurnHash,
+        inGame: true
+      })
     })
 
     socket.on('updateCurrentGame', data => {
@@ -174,26 +160,16 @@ class App extends React.Component {
       } else {
         alert(`The game is over! You made: ${this.state.moves.join(' ')}`);
       }
-      this.setState({moves: []});
+      this.setState({
+        moves: [],
+        inGame: false
+      });
     });
-    // socket.on('server-message', msg => {
-    //   // console.log('get message ' + msg.text);
-    //   this.getGame();
-    // });
-
-    // socket.on('server-nextUser', data => {
-    //   // console.log(`server-nextUser: ${data}`);
-    //   this.setState({
-    //     curUserIndex: data.curUserIndex,
-    //     curUserHash: data.curUserHash
-    //   })
-    // });
 
   } // end componentdidmount
 
   render() {
-    // console.log(this.state);
-    const { myHash, moves, users, curUserHash } = this.state;
+    const { myHash, moves, users, curUserHash, inGame} = this.state;
     return (
       <div>
         <WordList movesList={moves}/>
@@ -201,10 +177,17 @@ class App extends React.Component {
         <InputWord 
           handleInputChange={this.handleInputChange} 
           handleSubmitInput={this.handleSubmitInput} 
-          isEnabled={myHash==curUserHash}
+          isEnabled={myHash==curUserHash && inGame}
         />
-        <button type="button" onClick={this.handleStartGame}>Start</button>
-        <button type="button" onClick={this.handleEndGame}>End</button>
+        {!inGame &&
+          <button type="button" onClick={this.handleStartGame}>Start</button>
+        }
+        {inGame &&
+          <div>
+            <button type="button" onClick={this.handleEndGame}>End</button>
+            <Timer handleEndGame={this.handleEndGame} />
+          </div>
+        }
       </div>
     );
   }
