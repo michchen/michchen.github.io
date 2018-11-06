@@ -5,7 +5,7 @@ class Timer extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            timer: 2,
+            timer: 10,
         }
         
         this.timer = this.timer.bind(this);
@@ -16,19 +16,22 @@ class Timer extends React.Component {
             this.setState({
                 timer: this.state.timer - 1
             })
-            if (this.state.timer) { this.timer(); }
+            if (this.state.timer) { 
+                this.timer(); 
+            }
         }, 1000);
     };
 
     componentDidMount(){
-        this.timer();
+        if (this.state.timer) {
+            this.timer();
+        }
     }
 
     render(){
         const { timer } = this.state;
-        if (timer === 0){
+        if (timer === 0) {
             this.props.handleEndGame();
-            // alert("endgame");
         }
         return (
             <div>{ timer }</div>

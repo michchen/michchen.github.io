@@ -96,12 +96,13 @@ class App extends React.Component {
       }
     });
   }
+
   componentDidMount() {
     
     // gets gameID from window and sets it to state 
     const gameId = window.location.pathname.replace(/\//g,'');
     this.setState({ gameId: gameId });
-    
+
     // Add User to Socket 
     let myUser = 'player' + Math.round(Math.random() * 10000);
     let enteredUserName = prompt('Please enter your name', myUser);
@@ -155,14 +156,14 @@ class App extends React.Component {
     });
 
     socket.on('endGame', (disconnected) => {
-      if (disconnected) {
+      if (disconnected && this.state.inGame) {
         alert(`a player has disconnected! The game is over, you made ${this.state.moves.join(' ')}`)
-      } else {
+      } else if (this.state.inGame){
         alert(`The game is over! You made: ${this.state.moves.join(' ')}`);
       }
       this.setState({
         moves: [],
-        inGame: false
+        inGame: false,
       });
     });
 
@@ -170,27 +171,33 @@ class App extends React.Component {
 
   render() {
     const { myHash, moves, users, curUserHash, inGame} = this.state;
-    return (
-      <div>
-        <WordList movesList={moves}/>
-        <UserList userList={users} curUserHash={curUserHash}/>
-        <InputWord 
-          handleInputChange={this.handleInputChange} 
-          handleSubmitInput={this.handleSubmitInput} 
-          isEnabled={myHash==curUserHash && inGame}
-        />
-        {!inGame &&
-          <button type="button" onClick={this.handleStartGame}>Start</button>
-        }
-        {inGame &&
-          <div>
-            <button type="button" onClick={this.handleEndGame}>End</button>
-            <Timer handleEndGame={this.handleEndGame} />
-          </div>
-        }
-      </div>
-    );
-  }
+    console.log('pathname', window.location.pathname)
+    // if (window.location.pathname === '/'){
+    //   return (
+    //   <div>why doesn't this work lol </div>)
+    // } else {
+      return (
+        <div>
+          <WordList movesList={moves}/>
+          <UserList userList={users} curUserHash={curUserHash}/>
+          <InputWord 
+            handleInputChange={this.handleInputChange} 
+            handleSubmitInput={this.handleSubmitInput} 
+            isEnabled={myHash==curUserHash && inGame}
+          />
+          {!inGame &&
+            <button type="button" onClick={this.handleStartGame}>Start</button>
+          }
+          {inGame &&
+            <div>
+              <button type="button" onClick={this.handleEndGame}>End</button>
+              <Timer handleEndGame={this.handleEndGame} />
+            </div>
+          }
+        </div>
+      );
+    }
+  // }
 }
 
 ReactDOM.render(<App />, document.getElementById('app'));

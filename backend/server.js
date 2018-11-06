@@ -19,65 +19,34 @@ app.use(bodyParser.urlencoded({ extended: false }))
 
 app.use('/:id', express.static(__dirname + '/../react-client/dist'));
 
-
-app.get('/', (req, res) => {
-  res.send('main page');
-});
-
 app.post('/api/end', (req, res) => {
   const { gameId } = req.body;
-  console.log('data from the api route', req.body)
   ctrl.postGame(req.body, () => {
     io.sockets.in(gameId).emit("endGame");
     res.end()}
-  )
-  // ctrl.insertWord(req.body, data => {
-  //   res.send(data);
-  // });
+  )  
 });
-
-// DEPRECIATED LOL //
-
-// app.post('/api/post', bodyParser.json() , (req, res) => {
-//   ctrl.insertWord(req.body, data => {
-//     res.send(data);
-//   });
-// });
-
-// app.get('/api/get', (req, res) => {
-//   console.log('req body from get', req.query);
-//   ctrl.getWords(req.query, data => {
-//     res.send(data)
-//   });
-// });
-
-
 
 // HELPER FUNCTIONS //
 
-const nextTurn = () => {
-  // console.log('NEXT TURN');
-  // let temp = curUserIndex
-  curUserIndex++;
-  if (curUserIndex >= userList.length) {
-    curUserIndex = 0;
-  }
-  // console.log(userList);
-  // console.log(`user index changes from ${temp} --> ${curUserIndex}`);
-  if (userList[curUserIndex]) {
-    curUserHash = userList[curUserIndex][0];
-  }
-}
+// deprecated
+
+// const nextTurn = () => {
+//   curUserIndex++;
+//   if (curUserIndex >= userList.length) {
+//     curUserIndex = 0;
+//   }
+//   if (userList[curUserIndex]) {
+//     curUserHash = userList[curUserIndex][0];
+//   }
+// }
 
 //////////////////////
 //   LOCALSTORAGE   //
 //////////////////////
 
-// let curGame;
-// let curUserIndex = 0;
 let currentRoomsAndUsers = {};
 let currentUsers = {};
-// let curGamesHash = {};
 
 ////////////////
 //   SERVER   //
